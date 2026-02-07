@@ -14,8 +14,8 @@ import {
 
 const nav = [
   {
-    title: "Dashboard",
-    url: "/layout/dashboard",
+    title: "Work Items",
+    url: "/layout/workitems",
     icon: CircleGauge,
     isActive: true,
   },

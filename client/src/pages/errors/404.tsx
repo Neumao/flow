@@ -14,8 +14,8 @@ export default function NotFoundPage() {
                 <p className="text-sm text-muted-foreground max-w-md">
                     Looks like this page went on a coffee break. Maybe it's hiding in the inventory?
                 </p>
-                <Button onClick={() => navigate('/layout/dashboard')}>
-                    Go to Dashboard
+                <Button onClick={() => navigate('/layout/workitems')}>
+                    Go to Work Items
                 </Button>
             </div>
         </div>

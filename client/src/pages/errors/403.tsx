@@ -14,8 +14,8 @@ export default function ForbiddenPage() {
                 <p className="text-sm text-muted-foreground max-w-md">
                     Sorry, you don't have the right key for this register. Manager's permission required!
                 </p>
-                <Button onClick={() => navigate('/layout/dashboard')}>
-                    Go to Dashboard
+                <Button onClick={() => navigate('/layout/workitems')}>
+                    Go to Work Items
                 </Button>
             </div>
         </div>

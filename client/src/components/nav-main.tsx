@@ -1,4 +1,4 @@
-import { ChevronRight, type LucideIcon } from "lucide-react"
+import { ChevronRight, type LucideIcon, ListChecks } from "lucide-react"
 
 import {
   Collapsible,
@@ -80,6 +80,7 @@ export function NavMain({
             </SidebarMenuItem>
           )
         )}
+
       </SidebarMenu>
     </SidebarGroup>
   )

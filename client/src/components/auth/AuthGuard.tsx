@@ -33,7 +33,7 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     if (PUBLIC_ROUTES.includes(location.pathname)) {
         // If user is already authenticated and tries to access login/signup, redirect to layout
         if (isAuthenticated && location.pathname !== '/forget-password') {
-            return <Navigate to="/layout/dashboard" replace />;
+            return <Navigate to="/layout/workitems" replace />;
         }
         return <>{children}</>;
     }

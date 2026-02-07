@@ -33,8 +33,8 @@ export function LoginForm({
 
         setUserFromToken(userData, data.login.data.authToken);
 
-        // Navigate to dashboard
-        navigate("/layout/dashboard");
+        // Navigate to Work Items
+        navigate("/layout/workitems");
       } else {
         setError(data.login.message || 'Login failed. Please try again.');
       }

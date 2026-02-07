@@ -12,8 +12,8 @@ import {
   Routes,
   Route,
 } from "react-router-dom"
-import DashboardPage from "@/pages/dashboard/index"
 import ProfilePage from "@/pages/profile/ProfilePage"
+import WorkItemsPage from "@/pages/workitems/WorkItemsPage"
 import NotFoundPage from "@/pages/errors/404"
 import InternalServerErrorPage from "@/pages/errors/500"
 import ForbiddenPage from "@/pages/errors/403"
@@ -42,8 +42,8 @@ export default function Page() {
         </header>
         <Separator />
         <Routes>
-          <Route path="dashboard" element={<DashboardPage />} />
           <Route path="profile" element={<ProfilePage />} />
+          <Route path="workitems" element={<WorkItemsPage />} />
           {/* Error Pages */}
           <Route path="404" element={<NotFoundPage />} />
           <Route path="500" element={<InternalServerErrorPage />} />
