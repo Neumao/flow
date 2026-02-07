@@ -1,0 +1,11 @@
+0. Read the Client and Server code and make yourself familiar with it like mutation and query handling and folder structure we have to follow folder structure and coding style must be same as existing code.
+1. Run the code by your self the command will be cd client then npm run dev and for server use different terminal cd server and npm run dev
+2. Check the existing issues and bugs in the code and fix them if any i change a lot of code and files as well so there might be some bugs
+3. Check the existing features and functionality are working fine or not
+4. I have changed the code to simple nav of shadcn ui but in layout i didn't change the code to utilize it also check if any where else we are doing mistake or don't calling correct component or component function's are not called correctly resolve these issues as well
+5. Update the Schema according to the User Model
+6. Update the Roles Of User according to the Documentation
+7. In controllers there is folder of analytics and file as well of analytics controller must use one which is in use and prefer to use file in controllers folder instead in child folder of analytics
+8. Check while creating user by mutation or rest api the email validation function is calling or not to validate it
+
+"NOTE MAKE SURE DONT BREAK THE EXISTING CODE AND FUNCTIONALITY & ALSO DONT FORGET THE CONTEXT OF CODE ITS STYLE OR DONT DO ANY MAJOR CHANGES TO THE CODE ALSO DONT MAKE MISTAKE REGARDING TO CLOSE OPEN TAGS OR SIMILAR ISSUES REGARDING TO CODING"

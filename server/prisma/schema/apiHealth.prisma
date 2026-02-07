@@ -1,0 +1,21 @@
+model ApiRequest {
+    id           String   @id @default(uuid()) @db.Uuid
+    endpoint     String
+    method       String
+    statusCode   Int
+    responseTime Int
+    userId       String?  @db.Uuid
+    userAgent    String?
+    ipAddress    String?
+    timestamp    DateTime @default(now())
+    error        String?
+    isCached     Boolean  @default(false)
+    isError      Boolean  @default(false)
+    user         User?    @relation(fields: [userId], references: [id])
+
+    @@index([timestamp])
+    @@index([endpoint])
+    @@index([userId])
+    @@index([statusCode])
+    @@map("api_requests")
+}

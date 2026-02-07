@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #007bff;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --info: #17a2b8;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --gray: #6c757d;
+            --white: #ffffff;
+            --shadow: 0 2px 4px rgba(0,0,0,0.1);
+            --shadow-lg: 0 4px 12px rgba(0,0,0,0.15);
+            --border-radius: 8px;
+            --border-radius-lg: 12px;
+            --font-size-sm: 0.85rem;
+            --font-size-base: 0.95rem;
+            --font-size-lg: 1.1rem;
+            --font-size-xl: 1.25rem;
+            --font-size-2xl: 1.5rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+            background: var(--white);
+            padding: 32px;
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow);
+        }
+
+        .header h1 {
+            font-size: var(--font-size-2xl);
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--primary), var(--info));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: var(--gray);
+            font-size: var(--font-size-sm);
+            font-weight: 400;
+        }
+
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--white);
+            border-radius: var(--border-radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--info));
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-card.success::before { background: linear-gradient(90deg, var(--success), #20c997); }
+        .stat-card.warning::before { background: linear-gradient(90deg, var(--warning), #fd7e14); }
+        .stat-card.danger::before { background: linear-gradient(90deg, var(--danger), #e83e8c); }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            font-size: 1.5rem;
+            color: var(--white);
+        }
+
+        .stat-icon.primary { background: linear-gradient(135deg, var(--primary), var(--info)); }
+        .stat-icon.success { background: linear-gradient(135deg, var(--success), #20c997); }
+        .stat-icon.warning { background: linear-gradient(135deg, var(--warning), #fd7e14); }
+        .stat-icon.danger { background: linear-gradient(135deg, var(--danger), #e83e8c); }
+
+        .stat-title {
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin: 4px 0;
+        }
+
+        .stat-subtitle {
+            font-size: var(--font-size-sm);
+            color: var(--gray);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .card {
+            background: var(--white);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .card-header h3 {
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .metric-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .metric-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
+        }
+
+        .metric-item:hover {
+            background: #e9ecef;
+            transform: translateX(4px);
+        }
+
+        .metric-label {
+            font-weight: 500;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: var(--font-size-sm);
+        }
+
+        .metric-value {
+            font-weight: 600;
+            font-size: var(--font-size-base);
+            color: var(--primary);
+        }
+
+        .metric-value.success { color: var(--success); }
+        .metric-value.warning { color: var(--warning); }
+        .metric-value.danger { color: var(--danger); }
+
+        .activity-section {
+            margin-bottom: 20px;
+        }
+
+        .activity-section h4 {
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .activity-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: var(--border-radius);
+            margin-bottom: 6px;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .activity-text {
+            font-size: var(--font-size-sm);
+            color: var(--dark);
+            flex: 1;
+        }
+
+        .activity-badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .activity-badge.status-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .activity-badge.status-error {
+            background: var(--danger);
+            color: white;
+        }
+
+        .activity-time {
+            font-size: var(--font-size-sm);
+            color: var(--gray);
+            font-weight: 500;
+        }
+
+        /* Enhanced API Call Styles */
+        .api-call-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+        }
+
+        .api-call-main {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            gap: 8px;
+        }
+
+        .api-call-details {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            font-size: var(--font-size-sm);
+            color: var(--gray);
+        }
+
+        .user-info {
+            flex: 1;
+            font-style: italic;
+        }
+
+        .response-time {
+            font-weight: 600;
+            color: var(--info);
+            font-size: var(--font-size-sm);
+        }
+
+        .cache-badge {
+            color: var(--warning);
+            margin-left: 4px;
+        }
+
+        .error-badge {
+            color: var(--danger);
+            margin-left: 4px;
+        }
+
+        .activity-badge.success {
+            background: var(--success);
+            color: white;
+        }
+
+        .activity-badge.warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .activity-badge.danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .activity-badge.info {
+            background: var(--info);
+            color: white;
+        }
+
+        .activity-badge.primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .empty-state {
+            justify-content: center !important;
+            color: var(--gray);
+            font-style: italic;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-good { background-color: var(--success); }
+        .status-warning { background-color: var(--warning); }
+        .status-error { background-color: var(--danger); }
+
+        .chart-section {
+            background: var(--white);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .chart-section h3 {
+            font-size: var(--font-size-xl);
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--dark);
+            text-align: center;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            padding: 24px;
+        }
+
+        .chart-container {
+            background: #f8f9fa;
+            border-radius: var(--border-radius);
+            padding: 16px;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .chart-container h4 {
+            font-size: var(--font-size-base);
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--dark);
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 250px;
+        }
+
+        .refresh-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .refresh-btn {
+            background: linear-gradient(135deg, var(--primary), var(--info));
+            color: var(--white);
+            border: none;
+            padding: 12px 24px;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .nav-btn {
+            background: linear-gradient(135deg, var(--primary), var(--info));
+            color: var(--white);
+            border: none;
+            padding: 12px 24px;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+            margin-left: 12px;
+        }
+
+        .nav-btn.primary {
+            background: linear-gradient(135deg, var(--primary), var(--info));
+        }
+
+        .nav-btn.info {
+            background: linear-gradient(135deg, var(--info), var(--primary));
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .footer {
+            text-align: center;
+            color: var(--gray);
+            font-size: 0.9rem;
+            margin-top: 24px;
+            padding: 16px;
+            background: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+
+            .header {
+                padding: 24px 16px;
+            }
+
+            .header h1 {
+                font-size: var(--font-size-xl);
+            }
+
+            .stats-overview {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+                padding: 16px;
+            }
+
+            .chart-wrapper {
+                height: 200px;
+            }
+
+            .stat-card {
+                padding: 20px;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card, .stat-card {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-chart-line"></i> {{title}}</h1>
+            <p>Real-time system monitoring and analytics dashboard</p>
+        </div>
+
+        <div class="refresh-section">
+            <button class="refresh-btn" onclick="location.reload()">
+                <i class="fas fa-sync-alt"></i> Refresh Dashboard
+            </button>
+            <button class="nav-btn primary" onclick="window.location.href='/api/analytics/api'">
+                <i class="fas fa-chart-bar"></i> API Analytics
+            </button>
+            <button class="nav-btn info" onclick="window.location.href='/api/analytics/logs'">
+                <i class="fas fa-file-alt"></i> Logs
+            </button>
+        </div>
+
+        <!-- Key Metrics Overview -->
+        <div class="stats-overview">
+            <div class="stat-card success">
+                <div class="stat-header">
+                    <div class="stat-icon success">
+                        <i class="fas fa-microchip"></i>
+                    </div>
+                    <div>
+                        <div class="stat-title">CPU Usage</div>
+                        <div class="stat-value">{{system.cpu.usage}}%</div>
+                        <div class="stat-subtitle">{{system.cpu.cores}} cores available</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card primary">
+                <div class="stat-header">
+                    <div class="stat-icon primary">
+                        <i class="fas fa-memory"></i>
+                    </div>
+                    <div>
+                        <div class="stat-title">Memory Usage</div>
+                        <div class="stat-value">{{system.memory.usagePercent}}%</div>
+                        <div class="stat-subtitle">{{system.memory.usedGB}} GB / {{system.memory.totalGB}} GB</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card warning">
+                <div class="stat-header">
+                    <div class="stat-icon warning">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div>
+                        <div class="stat-title">Total Users</div>
+                        <div class="stat-value">{{users.totalUsers}}</div>
+                        <div class="stat-subtitle">{{users.activeUsers}} active today</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card info">
+                <div class="stat-header">
+                    <div class="stat-icon info">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div>
+                        <div class="stat-title">System Uptime</div>
+                        <div class="stat-value">{{system.process.uptimeFormatted}}</div>
+                        <div class="stat-subtitle">{{system.process.uptime}} seconds</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Metrics -->
+        <div class="dashboard-grid">
+            <!-- System Performance -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-server"></i> System Performance</h3>
+                </div>
+                <div class="card-body">
+                    <div class="metric-grid">
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-microchip"></i> CPU Model
+                            </span>
+                            <span class="metric-value">{{system.cpu.model}}</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-tachometer-alt"></i> Load Average (1m)
+                            </span>
+                            <span class="metric-value">{{system.cpu.loadAverage1m}}</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-memory"></i> Heap Used
+                            </span>
+                            <span class="metric-value">{{system.process.heapUsed}} MB</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-database"></i> RSS Memory
+                            </span>
+                            <span class="metric-value">{{system.process.rss}} MB</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-globe"></i> Platform
+                            </span>
+                            <span class="metric-value">{{system.process.platform}}</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-code"></i> Node Version
+                            </span>
+                            <span class="metric-value">{{system.process.nodeVersion}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Memory Details -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-memory"></i> Memory Details</h3>
+                </div>
+                <div class="card-body">
+                    <div class="metric-grid">
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-fill"></i> Used Memory
+                            </span>
+                            <span class="metric-value">{{system.memory.used}} MB</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-expand"></i> Total Memory
+                            </span>
+                            <span class="metric-value">{{system.memory.total}} MB</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-wind"></i> Free Memory
+                            </span>
+                            <span class="metric-value success">{{system.memory.free}} MB</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-chart-pie"></i> Usage Percentage
+                            </span>
+                            <span class="metric-value">{{system.memory.usagePercent}}%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Analytics -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-users"></i> User Analytics</h3>
+                </div>
+                <div class="card-body">
+                    <div class="metric-grid">
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-user-friends"></i> Total Users
+                            </span>
+                            <span class="metric-value">{{users.totalUsers}}</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-user-check"></i> Active Users (24h)
+                            </span>
+                            <span class="metric-value success">{{users.activeUsers}}</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-user-plus"></i> New Users (24h)
+                            </span>
+                            <span class="metric-value warning">{{users.newUsers}}</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-shield-alt"></i> Verified Users
+                            </span>
+                            <span class="metric-value success">{{users.verifiedUsers}}</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-exclamation-triangle"></i> Unverified Users
+                            </span>
+                            <span class="metric-value danger">{{users.unverifiedUsers}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- API Analytics -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-exchange-alt"></i> API Analytics</h3>
+                </div>
+                <div class="card-body">
+                    <div class="metric-grid">
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-paper-plane"></i> Total Requests (24h)
+                            </span>
+                            <span class="metric-value">{{api.totalRequests}}</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-clock"></i> Avg Response Time
+                            </span>
+                            <span class="metric-value">{{api.avgResponseTime}}ms</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-exclamation-triangle"></i> Error Rate
+                            </span>
+                            <span class="metric-value danger">{{api.errorRate}}%</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-database"></i> Cache Hit Rate
+                            </span>
+                            <span class="metric-value success">{{api.cacheRate}}%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- API Schema Analytics -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-code-branch"></i> API Schema Analytics</h3>
+                </div>
+                <div class="card-body">
+                    <div class="metric-grid">
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-database"></i> Prisma Models
+                            </span>
+                            <span class="metric-value primary">{{apiSchema.prismaModels}}</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-server"></i> REST APIs
+                            </span>
+                            <span class="metric-value info">{{apiSchema.restEndpoints}}</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-search"></i> GraphQL Queries
+                            </span>
+                            <span class="metric-value success">{{apiSchema.graphqlQueries}}</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-edit"></i> GraphQL Mutations
+                            </span>
+                            <span class="metric-value warning">{{apiSchema.graphqlMutations}}</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-broadcast-tower"></i> GraphQL Subscriptions
+                            </span>
+                            <span class="metric-value danger">{{apiSchema.graphqlSubscriptions}}</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-cogs"></i> Total Operations
+                            </span>
+                            <span class="metric-value">{{apiSchema.totalApiEndpoints}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advanced Analytics -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-brain"></i> Advanced Analytics</h3>
+                </div>
+                <div class="card-body">
+                    <div class="metric-grid">
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-chart-area"></i> Request Patterns
+                            </span>
+                            <span class="metric-value info">{{advanced.requestPatterns}}</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-exclamation-circle"></i> Anomaly Detection
+                            </span>
+                            <span class="metric-value {{#if advanced.hasAnomalies}}danger{{else}}success{{/if}}">{{advanced.anomalyStatus}}</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-dollar-sign"></i> Cost Analysis
+                            </span>
+                            <span class="metric-value primary">${{advanced.costEstimate}}</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-handshake"></i> SLA Compliance
+                            </span>
+                            <span class="metric-value {{#if advanced.slaCompliant}}success{{else}}warning{{/if}}">{{advanced.slaCompliance}}%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Business Intelligence -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-chart-pie"></i> Business Intelligence</h3>
+                </div>
+                <div class="card-body">
+                    <div class="metric-grid">
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-user-friends"></i> User Engagement
+                            </span>
+                            <span class="metric-value success">{{business.userEngagementScore}}</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-globe"></i> Top Region
+                            </span>
+                            <span class="metric-value info">{{business.topRegion}}</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-mobile-alt"></i> Top Device
+                            </span>
+                            <span class="metric-value primary">{{business.topDevice}}</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-code-branch"></i> API Endpoints
+                            </span>
+                            <span class="metric-value warning">{{business.apiVersions}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Metrics -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-tachometer-alt"></i> Performance Metrics</h3>
+                </div>
+                <div class="card-body">
+                    <div class="metric-grid">
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-chart-line"></i> 95th Percentile
+                            </span>
+                            <span class="metric-value warning">{{performance.p95ResponseTime}}ms</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-arrow-up"></i> Peak Response
+                            </span>
+                            <span class="metric-value danger">{{performance.peakResponseTime}}ms</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-balance-scale"></i> Response Distribution
+                            </span>
+                            <span class="metric-value info">{{performance.fastRequests}}/{{performance.mediumRequests}}/{{performance.slowRequests}}</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-rocket"></i> Requests/Second
+                            </span>
+                            <span class="metric-value success">{{performance.requestsPerSecond}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Traffic & Usage -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-route"></i> Traffic & Usage</h3>
+                </div>
+                <div class="card-body">
+                    <div class="metric-grid">
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-clock"></i> Requests/Hour
+                            </span>
+                            <span class="metric-value primary">{{traffic.requestsPerHour}}</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-sun"></i> Peak Hour
+                            </span>
+                            <span class="metric-value warning">{{traffic.peakHour}}</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-exchange-alt"></i> API vs GraphQL
+                            </span>
+                            <span class="metric-value info">{{traffic.restRequests}}/{{traffic.graphqlRequests}}</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">
+                                <i class="fas fa-user"></i> Most Active User
+                            </span>
+                            <span class="metric-value success">{{traffic.mostActiveUser}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="chart-section">
+            <h3><i class="fas fa-chart-area"></i> Analytics Charts</h3>
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <h4><i class="fas fa-chart-line"></i> System Performance</h4>
+                    <div class="chart-wrapper">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <h4><i class="fas fa-users"></i> User Growth (Monthly)</h4>
+                    <div class="chart-wrapper">
+                        <canvas id="userGrowthChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><i class="fas fa-clock"></i> Last updated: {{timestamp}} | Generated at: {{generatedAt}}</p>
+        </div>
+    </div>
+
+    <script>
+        // System Performance Chart
+        const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+        const performanceChart = new Chart(performanceCtx, {
+            type: 'line',
+            data: {
+                labels: ['-5m', '-4m', '-3m', '-2m', '-1m', 'Now'],
+                datasets: [{
+                    label: 'CPU Usage (%)',
+                    data: [{{system.cpu.usage}}, {{system.cpu.usage}}, {{system.cpu.usage}}, {{system.cpu.usage}}, {{system.cpu.usage}}, {{system.cpu.usage}}],
+                    borderColor: 'var(--primary)',
+                    backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: 'var(--primary)',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }, {
+                    label: 'Memory Usage (%)',
+                    data: [{{system.memory.usagePercent}}, {{system.memory.usagePercent}}, {{system.memory.usagePercent}}, {{system.memory.usagePercent}}, {{system.memory.usagePercent}}, {{system.memory.usagePercent}}],
+                    borderColor: 'var(--success)',
+                    backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: 'var(--success)',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 15,
+                            font: {
+                                size: 11,
+                                weight: '500'
+                            }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        cornerRadius: 6,
+                        displayColors: true
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        grid: {
+                            color: 'rgba(0,0,0,0.05)'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            },
+                            font: {
+                                size: 10
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(0,0,0,0.05)'
+                        },
+                        ticks: {
+                            font: {
+                                size: 10
+                            }
+                        }
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                }
+            }
+        });
+
+        // User Growth Chart (Monthly)
+        const userGrowthCtx = document.getElementById('userGrowthChart').getContext('2d');
+        const userGrowthChart = new Chart(userGrowthCtx, {
+            type: 'bar',
+            data: {
+                labels: [{{#each monthlyGrowth}}'{{month}}',{{/each}}],
+                datasets: [{
+                    label: 'New Users',
+                    data: [{{#each monthlyGrowth}}{{newUsers}},{{/each}}],
+                    backgroundColor: 'rgba(255, 193, 7, 0.8)',
+                    borderColor: 'var(--warning)',
+                    borderWidth: 1,
+                    borderRadius: 4,
+                    borderSkipped: false
+                }, {
+                    label: 'Active Users',
+                    data: [{{#each monthlyGrowth}}{{activeUsers}},{{/each}}],
+                    backgroundColor: 'rgba(0, 123, 255, 0.8)',
+                    borderColor: 'var(--primary)',
+                    borderWidth: 1,
+                    borderRadius: 4,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 15,
+                            font: {
+                                size: 11,
+                                weight: '500'
+                            }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        cornerRadius: 6,
+                        displayColors: true
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        min: 0,
+                        ticks: {
+                            stepSize: 1,
+                            precision: 0,
+                            font: {
+                                size: 10
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0,0,0,0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(0,0,0,0.05)'
+                        },
+                        ticks: {
+                            font: {
+                                size: 10
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Auto-refresh every 30 seconds
+        setTimeout(() => {
+            location.reload();
+        }, 30000);
+
+        // Set activity badge colors based on status codes
+        document.querySelectorAll('.activity-badge[data-status]').forEach(badge => {
+            const status = parseInt(badge.getAttribute('data-status'));
+            if (status >= 400) {
+                badge.classList.add('status-error');
+            } else {
+                badge.classList.add('status-success');
+            }
+        });
+    </script>
+</body>
+</html>
