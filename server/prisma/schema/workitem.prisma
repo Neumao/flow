@@ -18,7 +18,8 @@ model WorkItem {
     blocked        Boolean              @default(false)
     blockReason    String? // nullable, only if blocked
     reworkRequired Boolean              @default(false)
-    createdBy      String
+    createdById    String               @db.Uuid
+    createdBy      User                 @relation(fields: [createdById], references: [id])
     createdAt      DateTime             @default(now())
     updatedAt      DateTime             @updatedAt
     auditEvents    WorkItemAuditEvent[]
@@ -29,7 +30,8 @@ model WorkItemAuditEvent {
     id            String         @id @default(uuid())
     workItem      WorkItem       @relation(fields: [workItemId], references: [id])
     workItemId    String
-    userId        String
+    userId        String         @db.Uuid
+    user          User           @relation(fields: [userId], references: [id])
     eventType     AuditEventType
     fromState     WorkItemState?
     toState       WorkItemState?

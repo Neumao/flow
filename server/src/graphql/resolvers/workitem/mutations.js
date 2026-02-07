@@ -11,7 +11,7 @@ import { logger } from '../../../config/logger.js';
 export const workItemMutations = {
     // Create a new work item
     createWorkItem: async (_, { input }, { user }) => {
-        if (!user) return apiResponse.error('Authentication required');
+        if (!user) throw new Error('Authentication required');
         const { title, description } = input;
         logger.debug(`Creating work item for user: ${user.id}`);
         const item = await prisma.workItem.create({
@@ -21,8 +21,9 @@ export const workItemMutations = {
                 state: 'NEW',
                 blocked: false,
                 reworkRequired: false,
-                createdBy: user.id,
+                createdById: user.id,
             },
+            include: { createdBy: true },
         });
         logger.info(`Work item created: ${item.id} by user: ${user.id}`);
         // TODO: Add audit event

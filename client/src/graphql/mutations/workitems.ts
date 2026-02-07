@@ -3,20 +3,24 @@ import { gql } from "@apollo/client";
 export const CREATE_WORKITEM_MUTATION = gql`
   mutation CreateWorkItem($input: CreateWorkItemInput!) {
     createWorkItem(input: $input) {
-      id
-      title
-      description
-      state
-      blocked
-      blockReason
-      reworkRequired
-      createdBy {
+      status
+      message
+      data {
         id
-        email
-        userName
+        title
+        description
+        state
+        blocked
+        blockReason
+        reworkRequired
+        createdBy {
+          id
+          email
+          userName
+        }
+        createdAt
+        updatedAt
       }
-      createdAt
-      updatedAt
     }
   }
 `;
@@ -24,14 +28,18 @@ export const CREATE_WORKITEM_MUTATION = gql`
 export const UPDATE_WORKITEM_MUTATION = gql`
   mutation UpdateWorkItem($id: ID!, $input: UpdateWorkItemInput!) {
     updateWorkItem(id: $id, input: $input) {
-      id
-      title
-      description
-      state
-      blocked
-      blockReason
-      reworkRequired
-      updatedAt
+      status
+      message
+      data {
+        id
+        title
+        description
+        state
+        blocked
+        blockReason
+        reworkRequired
+        updatedAt
+      }
     }
   }
 `;
@@ -39,10 +47,14 @@ export const UPDATE_WORKITEM_MUTATION = gql`
 export const BLOCK_WORKITEM_MUTATION = gql`
   mutation BlockWorkItem($id: ID!, $reason: String!) {
     blockWorkItem(id: $id, reason: $reason) {
-      id
-      blocked
-      blockReason
-      updatedAt
+      status
+      message
+      data {
+        id
+        blocked
+        blockReason
+        updatedAt
+      }
     }
   }
 `;
@@ -50,10 +62,14 @@ export const BLOCK_WORKITEM_MUTATION = gql`
 export const UNBLOCK_WORKITEM_MUTATION = gql`
   mutation UnblockWorkItem($id: ID!) {
     unblockWorkItem(id: $id) {
-      id
-      blocked
-      blockReason
-      updatedAt
+      status
+      message
+      data {
+        id
+        blocked
+        blockReason
+        updatedAt
+      }
     }
   }
 `;
@@ -61,10 +77,14 @@ export const UNBLOCK_WORKITEM_MUTATION = gql`
 export const REWORK_WORKITEM_MUTATION = gql`
   mutation ReworkWorkItem($id: ID!, $justification: String!) {
     reworkWorkItem(id: $id, justification: $justification) {
-      id
-      state
-      reworkRequired
-      updatedAt
+      status
+      message
+      data {
+        id
+        state
+        reworkRequired
+        updatedAt
+      }
     }
   }
 `;
@@ -72,13 +92,33 @@ export const REWORK_WORKITEM_MUTATION = gql`
 export const STATE_TRANSITION_MUTATION = gql`
   mutation StateTransition(
     $id: ID!
-    $toState: String!
+    $toState: WorkItemState!
     $justification: String
   ) {
-    stateTransition(id: $id, toState: $toState, justification: $justification) {
-      id
-      state
-      updatedAt
+    transitionWorkItem(
+      input: { id: $id, toState: $toState, justification: $justification }
+    ) {
+      status
+      message
+      data {
+        id
+        state
+        updatedAt
+      }
+    }
+  }
+`;
+
+export const CANCEL_WORKITEM_MUTATION = gql`
+  mutation CancelWorkItem($id: ID!, $justification: String!) {
+    cancelWorkItem(id: $id, justification: $justification) {
+      status
+      message
+      data {
+        id
+        state
+        updatedAt
+      }
     }
   }
 `;

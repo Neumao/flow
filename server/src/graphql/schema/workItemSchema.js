@@ -25,6 +25,7 @@ const workItemSchema = `#graphql
     blocked: Boolean!
     blockReason: String
     reworkRequired: Boolean!
+    createdById: ID!
     createdBy: User!
     createdAt: DateTime!
     updatedAt: DateTime!
@@ -58,19 +59,41 @@ const workItemSchema = `#graphql
     justification: String
   }
 
+
+  type ApiResponse {
+    status: Boolean!
+    message: String!
+    data: WorkItem
+    pagination: Pagination
+  }
+
+  type ApiListResponse {
+    status: Boolean!
+    message: String!
+    data: [WorkItem!]
+    pagination: Pagination
+  }
+
+  type Pagination {
+    page: Int
+    pageSize: Int
+    total: Int
+    totalPages: Int
+  }
+
   type Query {
-    workItems: [WorkItem!]!
-    workItem(id: ID!): WorkItem
+    workItems: ApiListResponse!
+    workItem(id: ID!): ApiResponse!
   }
 
   type Mutation {
-    createWorkItem(input: CreateWorkItemInput!): WorkItem!
-    updateWorkItem(input: UpdateWorkItemInput!): WorkItem!
-    transitionWorkItem(input: StateTransitionInput!): WorkItem!
-    blockWorkItem(id: ID!, reason: String!): WorkItem!
-    unblockWorkItem(id: ID!): WorkItem!
-    reworkWorkItem(id: ID!, justification: String!): WorkItem!
-    cancelWorkItem(id: ID!, justification: String!): WorkItem!
+    createWorkItem(input: CreateWorkItemInput!): ApiResponse!
+    updateWorkItem(input: UpdateWorkItemInput!): ApiResponse!
+    transitionWorkItem(input: StateTransitionInput!): ApiResponse!
+    blockWorkItem(id: ID!, reason: String!): ApiResponse!
+    unblockWorkItem(id: ID!): ApiResponse!
+    reworkWorkItem(id: ID!, justification: String!): ApiResponse!
+    cancelWorkItem(id: ID!, justification: String!): ApiResponse!
   }
 `;
 
