@@ -3,6 +3,7 @@ import { logger } from '../../config/logger.js';
 import { ValidationError, NotFoundError, ConflictError } from '../../utils/errors.js';
 import { generateAccessToken, generateRefreshToken } from '../../utils/jwtUtils.js';
 import { prisma } from '../../lib/prisma.js';
+import { isValidEmail } from '../../utils/emailValidation.js';
 
 /**
  * Service for user-related operations
@@ -15,6 +16,10 @@ export class UserService {
      */
     static async createUser(userData) {
         const { email, password, firstName, lastName } = userData;
+        if (!isValidEmail(email)) {
+            logger.warn(`Invalid email format: ${email}`);
+            throw new ValidationError('Invalid email format');
+        }
 
         // Check if user already exists
         const existingUser = await prisma.user.findUnique({

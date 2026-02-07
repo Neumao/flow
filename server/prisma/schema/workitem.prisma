@@ -1,0 +1,46 @@
+// Work Item State Enum
+enum WorkItemState {
+    NEW
+    IN_PROGRESS
+    REVIEW
+    BLOCKED
+    REWORK
+    DONE
+    CANCELLED
+}
+
+// Work Item Model
+model WorkItem {
+    id             String               @id @default(uuid())
+    title          String
+    description    String
+    state          WorkItemState
+    blocked        Boolean              @default(false)
+    blockReason    String? // nullable, only if blocked
+    reworkRequired Boolean              @default(false)
+    createdBy      String
+    createdAt      DateTime             @default(now())
+    updatedAt      DateTime             @updatedAt
+    auditEvents    WorkItemAuditEvent[]
+}
+
+// Work Item Audit/History
+model WorkItemAuditEvent {
+    id            String         @id @default(uuid())
+    workItem      WorkItem       @relation(fields: [workItemId], references: [id])
+    workItemId    String
+    userId        String
+    eventType     AuditEventType
+    fromState     WorkItemState?
+    toState       WorkItemState?
+    justification String?
+    createdAt     DateTime       @default(now())
+}
+
+enum AuditEventType {
+    STATE_CHANGE
+    BLOCKED
+    UNBLOCKED
+    REWORK
+    CANCELLED
+}

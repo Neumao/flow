@@ -4,6 +4,7 @@ import { generateAccessToken, generateRefreshToken } from '../../../utils/jwtUti
 import { apiResponse } from '../../../utils/response.js';
 import { prisma } from '../../../lib/prisma.js';
 import config from '../../../config/env.js';
+import { isValidEmail } from '../../../utils/emailValidation.js';
 
 /**
  * User Domain - Mutation Resolvers
@@ -15,6 +16,12 @@ export const userMutations = {
      */
     register: async (_, { input }) => {
         const { email, password, firstName, lastName, userName, role } = input;
+
+        // Validate email format
+        if (!isValidEmail(email)) {
+            logger.warn(`Invalid email format: ${email}`);
+            return apiResponse.error('Invalid email format');
+        }
 
         // Check if user already exists
         const existingUser = await prisma.user.findUnique({

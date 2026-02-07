@@ -1,11 +1,167 @@
-0. Read the Client and Server code and make yourself familiar with it like mutation and query handling and folder structure we have to follow folder structure and coding style must be same as existing code.
-1. Run the code by your self the command will be cd client then npm run dev and for server use different terminal cd server and npm run dev
-2. Check the existing issues and bugs in the code and fix them if any i change a lot of code and files as well so there might be some bugs
-3. Check the existing features and functionality are working fine or not
-4. I have changed the code to simple nav of shadcn ui but in layout i didn't change the code to utilize it also check if any where else we are doing mistake or don't calling correct component or component function's are not called correctly resolve these issues as well
-5. Update the Schema according to the User Model
-6. Update the Roles Of User according to the Documentation
-7. In controllers there is folder of analytics and file as well of analytics controller must use one which is in use and prefer to use file in controllers folder instead in child folder of analytics
-8. Check while creating user by mutation or rest api the email validation function is calling or not to validate it
+Product Overview
 
-"NOTE MAKE SURE DONT BREAK THE EXISTING CODE AND FUNCTIONALITY & ALSO DONT FORGET THE CONTEXT OF CODE ITS STYLE OR DONT DO ANY MAJOR CHANGES TO THE CODE ALSO DONT MAKE MISTAKE REGARDING TO CLOSE OPEN TAGS OR SIMILAR ISSUES REGARDING TO CODING"
+Build an internal web application used by an operations team to manage work items as they move
+through a lifecycle. Work items represent units of work that may require coordination, review, and
+rework.
+The system is expected to evolve, so design decisions should account for change.
+
+Core Requirements
+Users & Access Control
+The system must support authenticated users.
+Each user must:
+Be able to sign in to the system
+Have an assigned role
+Perform actions according to permissions associated with their role
+At minimum, the system should support:
+Multiple users
+Role-based access control
+Role definitions and permissions are left to your discretion and should be clearly documented.
+Work Items
+A work item must support:
+Creation
+Updates over time
+Movement through defined states
+Temporary blocking
+Historical visibility into changes
+Each work item must have:
+A unique identifier
+A title
+A detailed description
+A current state
+Timestamps for creation and updates
+
+Lifecycle & State Management
+Work items move through multiple states during their lifetime.
+State Behavior
+State transitions must follow defined rules
+Not all state changes are allowed
+Some transitions require additional input
+A blocked work item cannot progress
+Rework must be explicitly represented
+Invalid transitions must be rejected and clearly communicated.
+State changes must be recorded and retrievable.
+
+Blocking & Rework
+A work item can be marked as blocked with a reason
+While blocked, progression is restricted
+Blocking and unblocking events must be traceable
+Rework requires justification and affects lifecycle flow
+
+Backend Requirements
+Authentication & Authorization
+The backend must implement authentication for all non-public endpoints.
+Requirements:
+Users must authenticate before accessing protected resources
+Authentication mechanism is your choice (e.g. session-based, token-based)
+Credentials must be handled securely
+Authorization requirements:
+API access must be restricted based on user role or permissions
+Certain operations must be forbidden for unauthorized users
+Authorization must be enforced server-side
+Authorization failures must return appropriate HTTP status codes and messages.
+API
+Design and implement a backend API that supports:
+User authentication
+Authorization-aware access to resources
+Creating and managing work items
+Controlled state transitions
+Blocking and unblocking
+Retrieval of historical changes
+Data Integrity
+Enforce lifecycle rules at the server level
+Enforce authorization rules at the server level
+Prevent invalid or conflicting updates
+Handle concurrent updates safely
+Technical Choices
+Programming language, framework, and database are your choice
+Use persistence (in-memory only solutions are not acceptable)
+Validation, authentication, and error handling are required
+API
+Design and implement a backend API that supports:
+Creating and managing work items
+Controlled state transitions
+Blocking and unblocking
+Retrieval of historical changes
+Data Integrity
+Enforce lifecycle rules at the server level
+Prevent invalid or conflicting updates
+Handle concurrent updates safely
+Technical Choices
+Programming language, framework, and database are your choice
+Use persistence (in-memory only solutions are not acceptable)
+Validation and error handling are required
+
+Frontend Requirements
+Build a web interface that allows authenticated users to:
+Sign in to the application
+View a list of work items they are permitted to access
+Inspect a single work item in detail
+See its current state and history
+Perform allowed actions based on its state and their permissions
+Understand why certain actions are unavailable
+The interface should:
+Reflect server-side authorization rules accurately
+Handle authentication state (signed in / signed out)
+Handle loading and error states
+Prevent at least some invalid or unauthorized actions before submission
+Design quality is not the focus, but usability and clarity are.
+Build a web interface that allows users to:
+View a list of work items
+Inspect a single work item in detail
+See its current state and history
+Perform allowed actions based on its state
+Understand why certain actions are unavailable
+The interface should:
+Reflect server-side rules accurately
+Handle loading and error states
+Prevent at least some invalid actions before submission
+Design quality is not the focus, but usability and clarity are.
+
+History & Audit Trail
+The system must maintain a history of:
+State changes
+Blocking and unblocking
+Rework events
+Users must be able to view this history in a meaningful way.
+
+Edge Case Handling
+The system should behave predictably when:
+Multiple updates occur close together
+A work item changes state while being viewed
+Invalid or outdated data is submitted
+Document how these cases are handled.
+
+Documentation
+Include a README containing:
+Setup instructions
+How to run backend and frontend
+Key design decisions
+Known limitations
+Assumptions made during development
+
+Evaluation Criteria
+Submissions will be evaluated on:
+Correctness and robustness
+Quality of state management
+Correctness of authentication and authorization
+Clarity of domain and permission modeling
+Handling of invalid and unauthorized scenarios
+Code readability and structure
+Thoughtfulness of decisions
+Submissions will be evaluated on:
+Correctness and robustness
+Quality of state management
+Clarity of domain modeling
+Handling of invalid scenarios
+Code readability and structure
+Thoughtfulness of decisions
+
+Constraints
+Authentication and authorization are required
+External services are optional
+Focus on correctness, security, and maintainability over completeness
+Authentication and authorization are not required
+External services are optional
+Focus on correctness and maintainability over completeness
+
+"NOTE MAKE SURE DONT BREAK THE EXISTING CODE AND FUNCTIONALITY & ALSO DONT FORGET THE CONTEXT OF CODE ITS STYLE OR DONT DO ANY MAJOR CHANGES TO THE CODE ALSO DONT MAKE MISTAKE REGARDING TO CLOSE OPEN TAGS OR SIMILAR ISSUES REGARDING TO CODING VERY IMPORTANT 'DONT ADD ANY EXTRA FEATURES WHICH ARE NOT IN CONTEXT/ DOCUMENTS' "
