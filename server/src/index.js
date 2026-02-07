@@ -139,7 +139,9 @@ async function startServer() {
                 logger.info('HTTP server shut down successfully');
                 apolloServer.stop().then(() => {
                     logger.info('Apollo Server stopped');
-                    process.exit(0);
+                    setTimeout(() => {
+                        process.exit(0);
+                    }, 500); // 500ms delay to allow OS to release port
                 });
             });
         }
