@@ -22,21 +22,12 @@ import MaintenancePage from "@/pages/errors/503"
 // ...existing code...
 
 export default function Page() {
-  const [activeTeam, setActiveTeam] = useState(() => {
-    const saved = localStorage.getItem("activeTeam");
-    return saved ? JSON.parse(saved) : { name: "Point Of Sale" };
-  });
-
-  useEffect(() => {
-    localStorage.setItem("activeTeam", JSON.stringify(activeTeam));
-  }, [activeTeam]);
-
   // Navigation is handled by AppSidebar component
   // ...existing code...
 
   return (
     <SidebarProvider>
-      <AppSidebar activeTeam={activeTeam} onTeamChange={setActiveTeam} />
+      <AppSidebar />
       <SidebarInset className="p-0 m-0  overflow-x-hidden">
         <header className="flex h-12 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
           {/* Breadcrumbs removed */}

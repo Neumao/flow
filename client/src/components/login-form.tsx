@@ -29,7 +29,6 @@ export function LoginForm({
           email: data.login.data.email,
           name: data.login.data.firstName || data.login.data.userName || '',
           role: data.login.data.role,
-          profileImageUrl: data.login.data.profileImageUrl || '',
         };
 
         setUserFromToken(userData, data.login.data.authToken);

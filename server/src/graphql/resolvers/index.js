@@ -24,7 +24,8 @@ const resolvers = {
         users: userResolvers.users,
 
         // WorkItem queries
-        ...workItemResolvers.Query,
+        workItems: workItemResolvers.workItems,
+        workItem: workItemResolvers.workItem,
     },
 
     Mutation: {
@@ -40,7 +41,13 @@ const resolvers = {
         deleteUser: userResolvers.deleteUser,
 
         // WorkItem mutations
-        ...workItemResolvers.Mutation,
+        createWorkItem: workItemResolvers.createWorkItem,
+        updateWorkItem: workItemResolvers.updateWorkItem,
+        transitionWorkItem: workItemResolvers.transitionWorkItem,
+        blockWorkItem: workItemResolvers.blockWorkItem,
+        unblockWorkItem: workItemResolvers.unblockWorkItem,
+        reworkWorkItem: workItemResolvers.reworkWorkItem,
+        cancelWorkItem: workItemResolvers.cancelWorkItem,
     },
 
     Subscription: {

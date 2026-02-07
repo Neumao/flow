@@ -44,13 +44,13 @@ export function useTheme() {
       root.style.setProperty("--primary-foreground", "oklch(0.985 0 0)"); // white text
       root.style.setProperty(
         "--sidebar-primary-foreground",
-        "oklch(0.985 0 0)"
+        "oklch(0.985 0 0)",
       );
     } else {
       root.style.setProperty("--primary-foreground", "oklch(0.145 0 0)"); // dark text
       root.style.setProperty(
         "--sidebar-primary-foreground",
-        "oklch(0.985 0 0)"
+        "oklch(0.985 0 0)",
       );
     }
 

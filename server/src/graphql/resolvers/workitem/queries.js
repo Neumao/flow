@@ -11,8 +11,12 @@ import { logger } from '../../../config/logger.js';
 export const workItemQueries = {
     // Get all accessible work items for the user (role-based)
     workItems: async (_, __, { user }) => {
+        console.log('workItems resolver called with user:', user);
         try {
-            if (!user) return [];
+            if (!user) {
+                logger.warn('No user context provided to workItems resolver');
+                return [];
+            }
             // SYSADMIN/ADMIN/MODERATOR: all, USER: own only
             let where = {};
             if (user.role === 'USER') {
@@ -20,8 +24,13 @@ export const workItemQueries = {
             }
             logger.debug(`Fetching work items for user: ${user?.id}, role: ${user?.role}`);
             const items = await prisma.workItem.findMany({ where });
+            logger.debug('prisma.workItem.findMany result:', items);
+            if (!Array.isArray(items)) {
+                logger.error('prisma.workItem.findMany did not return an array:', items);
+                return [];
+            }
             logger.info(`Fetched ${items.length} work items for user: ${user?.id}`);
-            return items || [];
+            return items;
         } catch (err) {
             logger.error('Error fetching work items:', err);
             return [];
