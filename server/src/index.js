@@ -155,6 +155,7 @@ await startServer()
     .then(async () => {
         logger.info('Server started successfully');
         await appSeeding.systemUser(); // Corrected to call the static method directly
+        await appSeeding.allUsers();
 
     })
     .catch(error => {

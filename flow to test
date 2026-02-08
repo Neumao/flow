@@ -1,11 +1,15 @@
 1. Create Work Item
 
 Any permitted user can create a new work item.
-Verify audit/history is recorded. 2. Update Work Item
+Verify audit/history is recorded.
+
+2. Update Work Item
 
 Permitted users can update title/description.
 Unauthorized users are rejected.
-Audit/history is updated. 3. State Transitions (Lifecycle)
+Audit/history is updated.
+
+3. State Transitions (Lifecycle)
 
 Test all allowed transitions:
 NEW → IN_PROGRESS
@@ -15,23 +19,33 @@ REWORK → IN_PROGRESS, CANCELLED
 BLOCKED → IN_PROGRESS (unblock)
 Any → CANCELLED (with justification)
 Attempt invalid transitions (should be rejected and error shown).
-Ensure only permitted roles can perform each transition. 4. Block/Unblock Work Item
+Ensure only permitted roles can perform each transition.
 
-Block a work item with a reason (permitted roles only).
-While blocked, no transitions except unblock are allowed.
-Unblock returns to allowed state.
-Audit/history records block/unblock events. 5. Request Rework
+4. Block/Unblock Work Item
+   Block a work item with a reason (permitted roles only).
+   While blocked, no transitions except unblock are allowed.
+   Unblock returns to allowed state.
+   Audit/history records block/unblock events.
+5. Request Rework
 
 From REVIEW, send to REWORK with justification (permitted roles only).
-Only allowed from REVIEW state. 6. View Work Item History
+Only allowed from REVIEW state.
 
-All state changes, block/unblock, and rework events are visible in audit/history. 7. Role-Based Access Control
+6. View Work Item History
+
+All state changes, block/unblock, and rework events are visible in audit/history.
+
+7. Role-Based Access Control
 
 Only users with correct role can perform each action.
-Users can only see and act on permitted work items. 8. Edge Cases
+Users can only see and act on permitted work items.
+
+8. Edge Cases
 
 Multiple updates close together (concurrency): Only latest valid update is accepted.
 State changes while viewing a work item: UI should handle and communicate if the item has changed or is outdated.
-Invalid or outdated data submission: Should be rejected and error clearly communicated to the user. 9. Error Handling
+Invalid or outdated data submission: Should be rejected and error clearly communicated to the user.
+
+9. Error Handling
 
 All errors (permission, invalid state, outdated data) are shown in the UI with clear messages.
