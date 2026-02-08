@@ -26,8 +26,8 @@ export const CREATE_WORKITEM_MUTATION = gql`
 `;
 
 export const UPDATE_WORKITEM_MUTATION = gql`
-  mutation UpdateWorkItem($id: ID!, $input: UpdateWorkItemInput!) {
-    updateWorkItem(id: $id, input: $input) {
+  mutation UpdateWorkItem($input: UpdateWorkItemInput!) {
+    updateWorkItem(input: $input) {
       status
       message
       data {

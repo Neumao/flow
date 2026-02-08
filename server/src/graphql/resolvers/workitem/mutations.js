@@ -40,9 +40,13 @@ export const workItemMutations = {
             logger.warn(`Work item not found: ${id}`);
             return apiResponse.error('Work item not found');
         }
-        if (user.role === 'USER' && item.createdBy !== user.id) {
+        if (user.role === 'USER' && item.createdById !== user.id) {
             logger.warn(`User ${user.id} not authorized to update work item ${id}`);
             return apiResponse.error('Not authorized to update this work item');
+        }
+        if (item.state === 'CANCELLED' || item.state === 'DONE') {
+            logger.warn(`Cannot update work item ${id} in state ${item.state}`);
+            return apiResponse.error('Cannot update a cancelled or completed work item');
         }
         const updated = await prisma.workItem.update({
             where: { id },
@@ -63,6 +67,9 @@ export const workItemMutations = {
         // Blocked items cannot progress except unblock
         if (item.blocked) {
             return apiResponse.error('Blocked items cannot transition');
+        }
+        if (item.state === 'CANCELLED' || item.state === 'DONE') {
+            return apiResponse.error('Cannot transition a cancelled or completed work item');
         }
 
         // Only allow valid transitions (requirements-plan.md)
@@ -87,7 +94,7 @@ export const workItemMutations = {
         }
 
         // USER can only transition their own items
-        if (user.role === 'USER' && item.createdBy !== user.id) {
+        if (user.role === 'USER' && item.createdById !== user.id) {
             return apiResponse.error('Not authorized to transition this work item');
         }
 
@@ -128,6 +135,7 @@ export const workItemMutations = {
         const item = await prisma.workItem.findUnique({ where: { id } });
         if (!item) return apiResponse.error('Work item not found');
         if (item.blocked) return apiResponse.error('Work item is already blocked');
+        if (item.state === 'CANCELLED' || item.state === 'DONE') return apiResponse.error('Cannot block a cancelled or completed work item');
         // Only MODERATOR/ADMIN/SYSADMIN can block
         if (!['MODERATOR', 'ADMIN', 'SYSADMIN'].includes(user.role)) {
             return apiResponse.error('Not authorized to block work items');
@@ -156,6 +164,7 @@ export const workItemMutations = {
         const item = await prisma.workItem.findUnique({ where: { id } });
         if (!item) return apiResponse.error('Work item not found');
         if (!item.blocked) return apiResponse.error('Work item is not blocked');
+        if (item.state === 'CANCELLED' || item.state === 'DONE') return apiResponse.error('Cannot unblock a cancelled or completed work item');
         // Only MODERATOR/ADMIN/SYSADMIN can unblock
         if (!['MODERATOR', 'ADMIN', 'SYSADMIN'].includes(user.role)) {
             return apiResponse.error('Not authorized to unblock work items');
@@ -210,8 +219,11 @@ export const workItemMutations = {
         const item = await prisma.workItem.findUnique({ where: { id } });
         if (!item) return apiResponse.error('Work item not found');
         // Only creator, ADMIN, or SYSADMIN can cancel
-        if (user.role === 'USER' && item.createdBy !== user.id) {
+        if (user.role === 'USER' && item.createdById !== user.id) {
             return apiResponse.error('Not authorized to cancel this work item');
+        }
+        if (item.state === 'CANCELLED') {
+            return apiResponse.error('Work item is already cancelled');
         }
         if (!justification) return apiResponse.error('Justification required for cancel');
         const updated = await prisma.workItem.update({

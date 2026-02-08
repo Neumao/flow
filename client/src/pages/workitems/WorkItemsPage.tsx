@@ -10,10 +10,12 @@ import { Alert } from "@/components/ui/alert"
 import { Loader2, Plus, Eye, Ban, CheckCircle, RefreshCw, Edit, XCircle, ArrowRightLeft, Lock, Unlock, Shield } from "lucide-react"
 import { WorkItemActions } from "@/components/workitem-actions"
 import { WorkItemCreateDialog } from "@/components/workitem-create-dialog"
+import { WorkItemEditDialog } from "@/components/workitem-edit-dialog"
 import { WORKITEMS_QUERY, WorkItem } from "@/graphql/queries/workitems"
 import { WORKITEM_DETAIL_QUERY, WorkItemDetail } from "@/graphql/queries/workitemDetail"
 import {
     CREATE_WORKITEM_MUTATION,
+    UPDATE_WORKITEM_MUTATION,
     BLOCK_WORKITEM_MUTATION,
     UNBLOCK_WORKITEM_MUTATION,
     REWORK_WORKITEM_MUTATION,
@@ -42,6 +44,12 @@ const WorkItemsPage = () => {
     const [cancelJustification, setCancelJustification] = useState("");
     const [cancelLoading, setCancelLoading] = useState(false);
     const [cancelError, setCancelError] = useState<string | null>(null);
+    // Dialog state for edit
+    const [editDialogOpen, setEditDialogOpen] = useState(false);
+    const [editTitle, setEditTitle] = useState("");
+    const [editDescription, setEditDescription] = useState("");
+    const [editLoading, setEditLoading] = useState(false);
+    const [editError, setEditError] = useState<string | null>(null);
     // Dialog state for state transition
     const [transitionDialogOpen, setTransitionDialogOpen] = useState(false);
     const [transitionState, setTransitionState] = useState("");
@@ -79,7 +87,7 @@ const WorkItemsPage = () => {
 
     // Mutations
     const [createWorkItem] = useMutation(CREATE_WORKITEM_MUTATION, { onCompleted: refetch })
-
+    const [updateWorkItem] = useMutation(UPDATE_WORKITEM_MUTATION)
     const [blockWorkItem] = useMutation(BLOCK_WORKITEM_MUTATION, { onCompleted: refetch })
     const [unblockWorkItem] = useMutation(UNBLOCK_WORKITEM_MUTATION, { onCompleted: refetch })
     const [reworkWorkItem] = useMutation(REWORK_WORKITEM_MUTATION, { onCompleted: refetch })
@@ -111,10 +119,16 @@ const WorkItemsPage = () => {
         e.preventDefault();
         setCreateLoading(true);
         try {
-            await createWorkItem({ variables: { input: { title: createTitle, description: createDescription } } });
+            const result = await createWorkItem({ variables: { input: { title: createTitle, description: createDescription } } });
+            if (result.data?.createWorkItem?.status === false) {
+                throw new Error(result.data.createWorkItem.message);
+            }
             setCreateDialogOpen(false);
             setCreateTitle("");
             setCreateDescription("");
+        } catch (err: unknown) {
+            const message = (err as Error).message || "Failed to create work item";
+            alert(message);
         } finally {
             setCreateLoading(false);
         }
@@ -234,14 +248,18 @@ const WorkItemsPage = () => {
                                                     <WorkItemActions
                                                         user={user}
                                                         workItem={detailData.workItem.data}
-                                                        onEdit={() => {/* open edit dialog or logic */ }}
+                                                        onEdit={() => {
+                                                            setEditTitle(detailData.workItem.data.title);
+                                                            setEditDescription(detailData.workItem.data.description);
+                                                            setEditDialogOpen(true);
+                                                        }}
                                                         onBlock={() => setBlockDialogOpen(true)}
                                                         onUnblock={() => setUnblockDialogOpen(true)}
                                                         onCancel={() => setCancelDialogOpen(true)}
                                                     />
                                                     {/* State Transition Button */}
                                                     <div className="flex justify-center">
-                                                        <Button size="sm" variant="secondary" className="gap-1 font-semibold" onClick={() => setTransitionDialogOpen(true)}>
+                                                        <Button size="sm" className="gap-1 font-semibold bg-black hover:bg-gray-800 text-white" onClick={() => setTransitionDialogOpen(true)}>
                                                             <ArrowRightLeft className="w-4 h-4" /> State Transition
                                                         </Button>
                                                     </div>
@@ -300,11 +318,16 @@ const WorkItemsPage = () => {
                                                 setReworkLoading(true);
                                                 setReworkError(null);
                                                 try {
-                                                    await reworkWorkItem({ variables: { id: detailData.workItem.data.id, justification: reworkJustification } });
+                                                    const result = await reworkWorkItem({ variables: { id: detailData.workItem.data.id, justification: reworkJustification } });
+                                                    if (result.data?.reworkWorkItem?.status === false) {
+                                                        throw new Error(result.data.reworkWorkItem.message);
+                                                    }
                                                     setReworkDialogOpen(false);
                                                     setReworkJustification("");
                                                 } catch (err: unknown) {
-                                                    setReworkError((err as Error).message || "Failed to send for rework");
+                                                    const message = (err as Error).message || "Failed to send for rework";
+                                                    setReworkError(message);
+                                                    alert(message);
                                                 } finally {
                                                     setReworkLoading(false);
                                                 }
@@ -352,12 +375,17 @@ const WorkItemsPage = () => {
                                                 setTransitionLoading(true);
                                                 setTransitionError(null);
                                                 try {
-                                                    await stateTransition({ variables: { id: detailData.workItem.data.id, toState: transitionState, justification: transitionJustification } });
+                                                    const result = await stateTransition({ variables: { id: detailData.workItem.data.id, toState: transitionState, justification: transitionJustification } });
+                                                    if (result.data?.transitionWorkItem?.status === false) {
+                                                        throw new Error(result.data.transitionWorkItem.message);
+                                                    }
                                                     setTransitionDialogOpen(false);
                                                     setTransitionState("");
                                                     setTransitionJustification("");
                                                 } catch (err: unknown) {
-                                                    setTransitionError((err as Error).message || "Failed to transition state");
+                                                    const message = (err as Error).message || "Failed to transition state";
+                                                    setTransitionError(message);
+                                                    alert(message);
                                                 } finally {
                                                     setTransitionLoading(false);
                                                 }
@@ -389,11 +417,16 @@ const WorkItemsPage = () => {
                                                 setCancelLoading(true);
                                                 setCancelError(null);
                                                 try {
-                                                    await cancelWorkItem({ variables: { id: detailData.workItem.data.id, justification: cancelJustification } });
+                                                    const result = await cancelWorkItem({ variables: { id: detailData.workItem.data.id, justification: cancelJustification } });
+                                                    if (result.data?.cancelWorkItem?.status === false) {
+                                                        throw new Error(result.data.cancelWorkItem.message);
+                                                    }
                                                     setCancelDialogOpen(false);
                                                     setCancelJustification("");
                                                 } catch (err: unknown) {
-                                                    setCancelError((err as Error).message || "Failed to cancel work item");
+                                                    const message = (err as Error).message || "Failed to cancel work item";
+                                                    setCancelError(message);
+                                                    alert(message);
                                                 } finally {
                                                     setCancelLoading(false);
                                                 }
@@ -425,11 +458,16 @@ const WorkItemsPage = () => {
                                                 setBlockLoading(true);
                                                 setBlockError(null);
                                                 try {
-                                                    await blockWorkItem({ variables: { id: detailData.workItem.data.id, reason: blockReason } });
+                                                    const result = await blockWorkItem({ variables: { id: detailData.workItem.data.id, reason: blockReason } });
+                                                    if (result.data?.blockWorkItem?.status === false) {
+                                                        throw new Error(result.data.blockWorkItem.message);
+                                                    }
                                                     setBlockDialogOpen(false);
                                                     setBlockReason("");
                                                 } catch (err: unknown) {
-                                                    setBlockError((err as Error).message || "Failed to block work item");
+                                                    const message = (err as Error).message || "Failed to block work item";
+                                                    setBlockError(message);
+                                                    alert(message);
                                                 } finally {
                                                     setBlockLoading(false);
                                                 }
@@ -455,10 +493,15 @@ const WorkItemsPage = () => {
                                                 setUnblockLoading(true);
                                                 setUnblockError(null);
                                                 try {
-                                                    await unblockWorkItem({ variables: { id: detailData.workItem.data.id } });
+                                                    const result = await unblockWorkItem({ variables: { id: detailData.workItem.data.id } });
+                                                    if (result.data?.unblockWorkItem?.status === false) {
+                                                        throw new Error(result.data.unblockWorkItem.message);
+                                                    }
                                                     setUnblockDialogOpen(false);
                                                 } catch (err: unknown) {
-                                                    setUnblockError((err as Error).message || "Failed to unblock work item");
+                                                    const message = (err as Error).message || "Failed to unblock work item";
+                                                    setUnblockError(message);
+                                                    alert(message);
                                                 } finally {
                                                     setUnblockLoading(false);
                                                 }
@@ -468,6 +511,54 @@ const WorkItemsPage = () => {
                                 </div>
                             </div>
                         )}
+                        {/* Edit dialog */}
+                        <WorkItemEditDialog
+                            open={editDialogOpen}
+                            onOpenChange={(open) => {
+                                setEditDialogOpen(open);
+                                if (!open) {
+                                    setEditTitle("");
+                                    setEditDescription("");
+                                    setEditError(null);
+                                }
+                            }}
+                            onUpdate={async (e) => {
+                                e.preventDefault();
+                                setEditLoading(true);
+                                setEditError(null);
+                                try {
+                                    const result = await updateWorkItem({
+                                        variables: {
+                                            input: {
+                                                id: detailData.workItem.data.id,
+                                                title: editTitle.trim(),
+                                                description: editDescription.trim()
+                                            }
+                                        }
+                                    });
+                                    if (result.data?.updateWorkItem?.status === false) {
+                                        throw new Error(result.data.updateWorkItem.message);
+                                    }
+                                    // Manually refetch data after successful update
+                                    await refetch();
+                                    setEditDialogOpen(false);
+                                    setEditTitle("");
+                                    setEditDescription("");
+                                } catch (err: unknown) {
+                                    const message = (err as Error).message || "Failed to update work item";
+                                    setEditError(message);
+                                    alert(message);
+                                } finally {
+                                    setEditLoading(false);
+                                }
+                            }}
+                            title={editTitle}
+                            description={editDescription}
+                            setTitle={setEditTitle}
+                            setDescription={setEditDescription}
+                            loading={editLoading}
+                            error={editError}
+                        />
                     </TabsContent>
                 </Tabs>
             </div>

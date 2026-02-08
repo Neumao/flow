@@ -103,8 +103,11 @@ const responseMiddleware = new ApolloLink((operation, forward) => {
               if (
                 data.status === false &&
                 (data.message === "Authentication required" ||
+                  data.message === "Invalid token" ||
+                  data.message === "Token expired" ||
                   data.message.includes("Authentication") ||
-                  data.message.includes("auth"))
+                  (data.message.includes("token") &&
+                    data.message.includes("invalid")))
               ) {
                 return true;
               }
