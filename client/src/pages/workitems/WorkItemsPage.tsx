@@ -1,12 +1,13 @@
 import { useState } from "react"
 import { useAuth } from "@/hooks/useAuth"
 import { useQuery, useMutation } from "@apollo/client/react"
-import { Card, CardHeader, CardContent } from "@/components/ui/card"
+import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Table, TableHeader, TableHead, TableRow, TableCell, TableBody } from "@/components/ui/table"
 import { Alert } from "@/components/ui/alert"
-import { Loader2, Plus, Eye, Ban, CheckCircle, RefreshCw, Edit, XCircle, ArrowRightLeft, Lock, Unlock } from "lucide-react"
+import { Loader2, Plus, Eye, Ban, CheckCircle, RefreshCw, Edit, XCircle, ArrowRightLeft, Lock, Unlock, Shield } from "lucide-react"
 import { WorkItemActions } from "@/components/workitem-actions"
 import { WorkItemCreateDialog } from "@/components/workitem-create-dialog"
 import { WORKITEMS_QUERY, WorkItem } from "@/graphql/queries/workitems"
@@ -198,274 +199,274 @@ const WorkItemsPage = () => {
                     {/* Work Item Detail */}
                     <TabsContent value="detail">
                         {selectedId && (
-                            <Card className="border-border/50 shadow-sm">
-                                <CardHeader className="flex flex-row items-center justify-between">
-                                    <h2 className="text-xl font-semibold">Work Item Details</h2>
-                                    <Button variant="outline" onClick={() => setSelectedId(null)}>
-                                        Back to List
-                                    </Button>
-                                </CardHeader>
-                                {/* Permissions Div */}
-                                <div className="mb-4 p-3 rounded bg-muted/20 border border-muted">
-                                    <h3 className="font-semibold text-sm mb-2">Permissions by Role</h3>
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead>Action</TableHead>
-                                                <TableHead>Allowed Roles</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {rolePermissions.map((perm) => (
-                                                <TableRow key={perm.action}>
-                                                    <TableCell>{perm.action}</TableCell>
-                                                    <TableCell>{perm.roles.join(", ")}</TableCell>
-                                                </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
-                                </div>
-                                <CardContent>
-                                    {detailLoading ? (
-                                        <div className="flex justify-center py-12"><Loader2 className="animate-spin w-8 h-8" /></div>
-                                    ) : detailError ? (
-                                        <Alert variant="destructive">{detailError.message}</Alert>
-                                    ) : detailData?.workItem?.data ? (
-                                        <div className="space-y-4">
-                                            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                                                <div>
-                                                    <div className="font-bold text-lg">{detailData.workItem.data.title}</div>
-                                                    <div className="text-muted-foreground">{detailData.workItem.data.description}</div>
-                                                </div>
-                                                <div className="flex gap-2">
-                                                    <span className="px-2 py-1 rounded bg-muted text-xs">{detailData.workItem.data.state}</span>
-                                                    {detailData.workItem.data.blocked && (
-                                                        <span className="px-2 py-1 rounded bg-destructive/20 text-destructive text-xs">Blocked</span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                            {/* Actions: update, block, unblock, rework, state transitions */}
-                                            <div className="flex flex-wrap gap-2 my-2">
-                                                {/* Refactored: Use WorkItemActions component */}
-                                                <WorkItemActions
-                                                    user={user}
-                                                    workItem={detailData.workItem.data}
-                                                    onEdit={() => {/* open edit dialog or logic */ }}
-                                                    onBlock={() => setBlockDialogOpen(true)}
-                                                    onUnblock={() => setUnblockDialogOpen(true)}
-                                                    onCancel={() => setCancelDialogOpen(true)}
-                                                />
-                                                {/* Rework dialog */}
-                                                {reworkDialogOpen && (
-                                                    <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
-                                                        <div className="bg-white dark:bg-zinc-900 p-6 rounded shadow-lg w-full max-w-md">
-                                                            <h4 className="font-semibold mb-2">Send for Rework</h4>
-                                                            <input
-                                                                className="w-full border p-2 rounded mb-4"
-                                                                placeholder="Enter justification for rework"
-                                                                value={reworkJustification}
-                                                                onChange={e => setReworkJustification(e.target.value)}
-                                                                disabled={reworkLoading}
-                                                            />
-                                                            {reworkError && <div className="text-red-600 text-sm mb-2">{reworkError}</div>}
-                                                            <div className="flex gap-2 justify-end">
-                                                                <Button variant="outline" onClick={() => { setReworkDialogOpen(false); setReworkJustification(""); setReworkError(null); }} disabled={reworkLoading}>Cancel</Button>
-                                                                <Button
-                                                                    variant="secondary"
-                                                                    disabled={reworkLoading || !reworkJustification.trim()}
-                                                                    onClick={async () => {
-                                                                        setReworkLoading(true);
-                                                                        setReworkError(null);
-                                                                        try {
-                                                                            await reworkWorkItem({ variables: { id: detailData.workItem.data.id, justification: reworkJustification } });
-                                                                            setReworkDialogOpen(false);
-                                                                            setReworkJustification("");
-                                                                        } catch (err: unknown) {
-                                                                            setReworkError((err as Error).message || "Failed to send for rework");
-                                                                        } finally {
-                                                                            setReworkLoading(false);
-                                                                        }
-                                                                    }}
-                                                                >{reworkLoading ? "Sending..." : "Send for Rework"}</Button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                                {/* State transition button (generic) */}
-                                                <Button size="sm" variant="secondary" className="gap-1" onClick={() => setTransitionDialogOpen(true)}>
-                                                    <ArrowRightLeft className="w-4 h-4" /> State Transition
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                {/* Left Section: Work Item Details and Actions */}
+                                <div className="lg:col-span-2 space-y-4">
+                                    <Card className="shadow-lg border-0 bg-linear-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900">
+                                        <CardHeader className="pb-3">
+                                            <div className="flex items-center justify-between">
+                                                <CardTitle className="text-lg font-bold text-gray-800 dark:text-gray-200">
+                                                    Work Item Details
+                                                </CardTitle>
+                                                <Button variant="outline" size="sm" onClick={() => setSelectedId(null)}>
+                                                    Back to List
                                                 </Button>
-                                                {/* State transition dialog */}
-                                                {transitionDialogOpen && (
-                                                    <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
-                                                        <div className="bg-white dark:bg-zinc-900 p-6 rounded shadow-lg w-full max-w-md">
-                                                            <h4 className="font-semibold mb-2">State Transition</h4>
-                                                            <div className="mb-4">
-                                                                <label className="block mb-1">Select new state:</label>
-                                                                <select
-                                                                    className="w-full border p-2 rounded mb-2"
-                                                                    value={transitionState}
-                                                                    onChange={e => setTransitionState(e.target.value)}
-                                                                    disabled={transitionLoading}
-                                                                >
-                                                                    <option value="">-- Select --</option>
-                                                                    {currentAllowed.map(state => (
-                                                                        <option key={state} value={state}>{state}</option>
-                                                                    ))}
-                                                                </select>
-                                                                {(transitionState === "REWORK" || transitionState === "BLOCKED" || transitionState === "CANCELLED") && (
-                                                                    <input
-                                                                        className="w-full border p-2 rounded mb-2"
-                                                                        placeholder="Enter justification"
-                                                                        value={transitionJustification}
-                                                                        onChange={e => setTransitionJustification(e.target.value)}
-                                                                        disabled={transitionLoading}
-                                                                    />
-                                                                )}
-                                                            </div>
-                                                            {transitionError && <div className="text-red-600 text-sm mb-2">{transitionError}</div>}
-                                                            <div className="flex gap-2 justify-end">
-                                                                <Button variant="outline" onClick={() => { setTransitionDialogOpen(false); setTransitionState(""); setTransitionJustification(""); setTransitionError(null); }} disabled={transitionLoading}>Cancel</Button>
-                                                                <Button
-                                                                    variant="secondary"
-                                                                    disabled={transitionLoading || !transitionState || ((transitionState === "REWORK" || transitionState === "BLOCKED" || transitionState === "CANCELLED") && !transitionJustification.trim())}
-                                                                    onClick={async () => {
-                                                                        setTransitionLoading(true);
-                                                                        setTransitionError(null);
-                                                                        try {
-                                                                            await stateTransition({ variables: { id: detailData.workItem.data.id, toState: transitionState, justification: transitionJustification } });
-                                                                            setTransitionDialogOpen(false);
-                                                                            setTransitionState("");
-                                                                            setTransitionJustification("");
-                                                                        } catch (err: unknown) {
-                                                                            setTransitionError((err as Error).message || "Failed to transition state");
-                                                                        } finally {
-                                                                            setTransitionLoading(false);
-                                                                        }
-                                                                    }}
-                                                                >{transitionLoading ? "Transitioning..." : "Transition"}</Button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                                {/* Cancel button (allowed in any state, including NEW) */}
-                                                {((user?.role === "SYSADMIN" || user?.role === "ADMIN" || (user?.role === "USER" && detailData.workItem.data.createdBy?.id === user.id))) ? (
-                                                    <Button size="sm" variant="destructive" className="gap-1" onClick={() => setCancelDialogOpen(true)}>
-                                                        <XCircle className="w-4 h-4" /> Cancel
-                                                    </Button>
-                                                ) : (
-                                                    <span className="text-xs text-muted-foreground">You do not have permission to cancel this work item.</span>
-                                                )}
-                                                {/* Cancel dialog */}
-                                                {cancelDialogOpen && (
-                                                    <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
-                                                        <div className="bg-white dark:bg-zinc-900 p-6 rounded shadow-lg w-full max-w-md">
-                                                            <h4 className="font-semibold mb-2">Cancel Work Item</h4>
-                                                            <input
-                                                                className="w-full border p-2 rounded mb-4"
-                                                                placeholder="Enter justification for cancel"
-                                                                value={cancelJustification}
-                                                                onChange={e => setCancelJustification(e.target.value)}
-                                                                disabled={cancelLoading}
-                                                            />
-                                                            {cancelError && <div className="text-red-600 text-sm mb-2">{cancelError}</div>}
-                                                            <div className="flex gap-2 justify-end">
-                                                                <Button variant="outline" onClick={() => { setCancelDialogOpen(false); setCancelJustification(""); setCancelError(null); }} disabled={cancelLoading}>Cancel</Button>
-                                                                <Button
-                                                                    variant="destructive"
-                                                                    disabled={cancelLoading || !cancelJustification.trim()}
-                                                                    onClick={async () => {
-                                                                        setCancelLoading(true);
-                                                                        setCancelError(null);
-                                                                        try {
-                                                                            await cancelWorkItem({ variables: { id: detailData.workItem.data.id, justification: cancelJustification } });
-                                                                            setCancelDialogOpen(false);
-                                                                            setCancelJustification("");
-                                                                        } catch (err: unknown) {
-                                                                            setCancelError((err as Error).message || "Failed to cancel work item");
-                                                                        } finally {
-                                                                            setCancelLoading(false);
-                                                                        }
-                                                                    }}
-                                                                >{cancelLoading ? "Cancelling..." : "Cancel Work Item"}</Button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                )}
                                             </div>
-                                            {/* Block dialog (scaffold) */}
-                                            {blockDialogOpen && (
-                                                <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
-                                                    <div className="bg-white dark:bg-zinc-900 p-6 rounded shadow-lg w-full max-w-md">
-                                                        <h4 className="font-semibold mb-2">Block Work Item</h4>
-                                                        <input
-                                                            className="w-full border p-2 rounded mb-4"
-                                                            placeholder="Enter block reason"
-                                                            value={blockReason}
-                                                            onChange={e => setBlockReason(e.target.value)}
-                                                            disabled={blockLoading}
-                                                        />
-                                                        {blockError && <div className="text-red-600 text-sm mb-2">{blockError}</div>}
-                                                        <div className="flex gap-2 justify-end">
-                                                            <Button variant="outline" onClick={() => { setBlockDialogOpen(false); setBlockReason(""); setBlockError(null); }} disabled={blockLoading}>Cancel</Button>
-                                                            <Button
-                                                                variant="destructive"
-                                                                disabled={blockLoading || !blockReason.trim()}
-                                                                onClick={async () => {
-                                                                    setBlockLoading(true);
-                                                                    setBlockError(null);
-                                                                    try {
-                                                                        await blockWorkItem({ variables: { id: detailData.workItem.data.id, reason: blockReason } });
-                                                                        setBlockDialogOpen(false);
-                                                                        setBlockReason("");
-                                                                    } catch (err: unknown) {
-                                                                        setBlockError((err as Error).message || "Failed to block work item");
-                                                                    } finally {
-                                                                        setBlockLoading(false);
-                                                                    }
-                                                                }}
-                                                            >{blockLoading ? "Blocking..." : "Block"}</Button>
+                                        </CardHeader>
+                                        <CardContent>
+                                            {detailLoading ? (
+                                                <div className="flex justify-center py-8"><Loader2 className="animate-spin w-6 h-6" /></div>
+                                            ) : detailError ? (
+                                                <Alert variant="destructive" className="text-sm">{detailError.message}</Alert>
+                                            ) : detailData?.workItem?.data ? (
+                                                <div className="space-y-4">
+                                                    <div className="space-y-2">
+                                                        <h3 className="font-semibold text-base text-gray-900 dark:text-gray-100">{detailData.workItem.data.title}</h3>
+                                                        <p className="text-sm text-gray-600 dark:text-gray-400">{detailData.workItem.data.description}</p>
+                                                        <div className="flex gap-2">
+                                                            <Badge variant="outline" className="text-xs">{detailData.workItem.data.state}</Badge>
+                                                            {detailData.workItem.data.blocked && (
+                                                                <Badge variant="destructive" className="text-xs">Blocked</Badge>
+                                                            )}
                                                         </div>
                                                     </div>
-                                                </div>
-                                            )}
-                                            {/* Unblock dialog (scaffold) */}
-                                            {unblockDialogOpen && (
-                                                <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
-                                                    <div className="bg-white dark:bg-zinc-900 p-6 rounded shadow-lg w-full max-w-md">
-                                                        <h4 className="font-semibold mb-2">Unblock Work Item</h4>
-                                                        <div className="mb-4">Are you sure you want to unblock this work item?</div>
-                                                        {unblockError && <div className="text-red-600 text-sm mb-2">{unblockError}</div>}
-                                                        <div className="flex gap-2 justify-end">
-                                                            <Button variant="outline" onClick={() => { setUnblockDialogOpen(false); setUnblockError(null); }} disabled={unblockLoading}>Cancel</Button>
-                                                            <Button
-                                                                variant="secondary"
-                                                                disabled={unblockLoading}
-                                                                onClick={async () => {
-                                                                    setUnblockLoading(true);
-                                                                    setUnblockError(null);
-                                                                    try {
-                                                                        await unblockWorkItem({ variables: { id: detailData.workItem.data.id } });
-                                                                        setUnblockDialogOpen(false);
-                                                                    } catch (err: unknown) {
-                                                                        setUnblockError((err as Error).message || "Failed to unblock work item");
-                                                                    } finally {
-                                                                        setUnblockLoading(false);
-                                                                    }
-                                                                }}
-                                                            >{unblockLoading ? "Unblocking..." : "Unblock"}</Button>
-                                                        </div>
+                                                    {/* Actions */}
+                                                    <WorkItemActions
+                                                        user={user}
+                                                        workItem={detailData.workItem.data}
+                                                        onEdit={() => {/* open edit dialog or logic */ }}
+                                                        onBlock={() => setBlockDialogOpen(true)}
+                                                        onUnblock={() => setUnblockDialogOpen(true)}
+                                                        onCancel={() => setCancelDialogOpen(true)}
+                                                    />
+                                                    {/* State Transition Button */}
+                                                    <div className="flex justify-center">
+                                                        <Button size="sm" variant="secondary" className="gap-1 font-semibold" onClick={() => setTransitionDialogOpen(true)}>
+                                                            <ArrowRightLeft className="w-4 h-4" /> State Transition
+                                                        </Button>
                                                     </div>
                                                 </div>
+                                            ) : (
+                                                <div className="text-center py-8 text-gray-500">No details found.</div>
                                             )}
-                                            {/* History Section */}
-                                            {/* History section placeholder - implement if history is available in detailData.workItem.data */}
+                                        </CardContent>
+                                    </Card>
+                                </div>
+                                {/* Right Section: Permissions */}
+                                <div className="lg:col-span-1">
+                                    <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                                        <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
+                                            <Shield className="w-4 h-4 text-emerald-600" />
+                                            Permissions
+                                        </h3>
+                                        <div className="space-y-2">
+                                            {rolePermissions.map((perm) => (
+                                                <div key={perm.action} className="text-xs">
+                                                    <span className="font-medium text-gray-700 dark:text-gray-300">{perm.action}:</span>
+                                                    <div className="flex flex-wrap gap-1 mt-1">
+                                                        {perm.roles.map((role) => (
+                                                            <Badge key={role} variant="secondary" className="text-xs px-1 py-0">
+                                                                {role}
+                                                            </Badge>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
-                                    ) : (
-                                        <div>No details found.</div>
-                                    )}
-                                </CardContent>
-                            </Card>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        {/* Dialogs */}
+                        {/* Rework dialog */}
+                        {reworkDialogOpen && (
+                            <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
+                                <div className="bg-white dark:bg-zinc-900 p-6 rounded shadow-lg w-full max-w-md">
+                                    <h4 className="font-semibold mb-2">Send for Rework</h4>
+                                    <input
+                                        className="w-full border p-2 rounded mb-4"
+                                        placeholder="Enter justification for rework"
+                                        value={reworkJustification}
+                                        onChange={e => setReworkJustification(e.target.value)}
+                                        disabled={reworkLoading}
+                                    />
+                                    {reworkError && <div className="text-red-600 text-sm mb-2">{reworkError}</div>}
+                                    <div className="flex gap-2 justify-end">
+                                        <Button variant="outline" onClick={() => { setReworkDialogOpen(false); setReworkJustification(""); setReworkError(null); }} disabled={reworkLoading}>Cancel</Button>
+                                        <Button
+                                            variant="secondary"
+                                            disabled={reworkLoading || !reworkJustification.trim()}
+                                            onClick={async () => {
+                                                setReworkLoading(true);
+                                                setReworkError(null);
+                                                try {
+                                                    await reworkWorkItem({ variables: { id: detailData.workItem.data.id, justification: reworkJustification } });
+                                                    setReworkDialogOpen(false);
+                                                    setReworkJustification("");
+                                                } catch (err: unknown) {
+                                                    setReworkError((err as Error).message || "Failed to send for rework");
+                                                } finally {
+                                                    setReworkLoading(false);
+                                                }
+                                            }}
+                                        >{reworkLoading ? "Sending..." : "Send for Rework"}</Button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        {/* State transition dialog */}
+                        {transitionDialogOpen && (
+                            <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
+                                <div className="bg-white dark:bg-zinc-900 p-6 rounded shadow-lg w-full max-w-md">
+                                    <h4 className="font-semibold mb-2">State Transition</h4>
+                                    <div className="mb-4">
+                                        <label className="block mb-1">Select new state:</label>
+                                        <select
+                                            className="w-full border p-2 rounded mb-2"
+                                            value={transitionState}
+                                            onChange={e => setTransitionState(e.target.value)}
+                                            disabled={transitionLoading}
+                                        >
+                                            <option value="">-- Select --</option>
+                                            {currentAllowed.map(state => (
+                                                <option key={state} value={state}>{state}</option>
+                                            ))}
+                                        </select>
+                                        {(transitionState === "REWORK" || transitionState === "BLOCKED" || transitionState === "CANCELLED") && (
+                                            <input
+                                                className="w-full border p-2 rounded mb-2"
+                                                placeholder="Enter justification"
+                                                value={transitionJustification}
+                                                onChange={e => setTransitionJustification(e.target.value)}
+                                                disabled={transitionLoading}
+                                            />
+                                        )}
+                                    </div>
+                                    {transitionError && <div className="text-red-600 text-sm mb-2">{transitionError}</div>}
+                                    <div className="flex gap-2 justify-end">
+                                        <Button variant="outline" onClick={() => { setTransitionDialogOpen(false); setTransitionState(""); setTransitionJustification(""); setTransitionError(null); }} disabled={transitionLoading}>Cancel</Button>
+                                        <Button
+                                            variant="secondary"
+                                            disabled={transitionLoading || !transitionState || ((transitionState === "REWORK" || transitionState === "BLOCKED" || transitionState === "CANCELLED") && !transitionJustification.trim())}
+                                            onClick={async () => {
+                                                setTransitionLoading(true);
+                                                setTransitionError(null);
+                                                try {
+                                                    await stateTransition({ variables: { id: detailData.workItem.data.id, toState: transitionState, justification: transitionJustification } });
+                                                    setTransitionDialogOpen(false);
+                                                    setTransitionState("");
+                                                    setTransitionJustification("");
+                                                } catch (err: unknown) {
+                                                    setTransitionError((err as Error).message || "Failed to transition state");
+                                                } finally {
+                                                    setTransitionLoading(false);
+                                                }
+                                            }}
+                                        >{transitionLoading ? "Transitioning..." : "Transition"}</Button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        {/* Cancel dialog */}
+                        {cancelDialogOpen && (
+                            <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
+                                <div className="bg-white dark:bg-zinc-900 p-6 rounded shadow-lg w-full max-w-md">
+                                    <h4 className="font-semibold mb-2">Cancel Work Item</h4>
+                                    <input
+                                        className="w-full border p-2 rounded mb-4"
+                                        placeholder="Enter justification for cancel"
+                                        value={cancelJustification}
+                                        onChange={e => setCancelJustification(e.target.value)}
+                                        disabled={cancelLoading}
+                                    />
+                                    {cancelError && <div className="text-red-600 text-sm mb-2">{cancelError}</div>}
+                                    <div className="flex gap-2 justify-end">
+                                        <Button variant="outline" onClick={() => { setCancelDialogOpen(false); setCancelJustification(""); setCancelError(null); }} disabled={cancelLoading}>Cancel</Button>
+                                        <Button
+                                            variant="destructive"
+                                            disabled={cancelLoading || !cancelJustification.trim()}
+                                            onClick={async () => {
+                                                setCancelLoading(true);
+                                                setCancelError(null);
+                                                try {
+                                                    await cancelWorkItem({ variables: { id: detailData.workItem.data.id, justification: cancelJustification } });
+                                                    setCancelDialogOpen(false);
+                                                    setCancelJustification("");
+                                                } catch (err: unknown) {
+                                                    setCancelError((err as Error).message || "Failed to cancel work item");
+                                                } finally {
+                                                    setCancelLoading(false);
+                                                }
+                                            }}
+                                        >{cancelLoading ? "Cancelling..." : "Cancel Work Item"}</Button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        {/* Block dialog */}
+                        {blockDialogOpen && (
+                            <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
+                                <div className="bg-white dark:bg-zinc-900 p-6 rounded shadow-lg w-full max-w-md">
+                                    <h4 className="font-semibold mb-2">Block Work Item</h4>
+                                    <input
+                                        className="w-full border p-2 rounded mb-4"
+                                        placeholder="Enter block reason"
+                                        value={blockReason}
+                                        onChange={e => setBlockReason(e.target.value)}
+                                        disabled={blockLoading}
+                                    />
+                                    {blockError && <div className="text-red-600 text-sm mb-2">{blockError}</div>}
+                                    <div className="flex gap-2 justify-end">
+                                        <Button variant="outline" onClick={() => { setBlockDialogOpen(false); setBlockReason(""); setBlockError(null); }} disabled={blockLoading}>Cancel</Button>
+                                        <Button
+                                            variant="destructive"
+                                            disabled={blockLoading || !blockReason.trim()}
+                                            onClick={async () => {
+                                                setBlockLoading(true);
+                                                setBlockError(null);
+                                                try {
+                                                    await blockWorkItem({ variables: { id: detailData.workItem.data.id, reason: blockReason } });
+                                                    setBlockDialogOpen(false);
+                                                    setBlockReason("");
+                                                } catch (err: unknown) {
+                                                    setBlockError((err as Error).message || "Failed to block work item");
+                                                } finally {
+                                                    setBlockLoading(false);
+                                                }
+                                            }}
+                                        >{blockLoading ? "Blocking..." : "Block"}</Button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        {/* Unblock dialog */}
+                        {unblockDialogOpen && (
+                            <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
+                                <div className="bg-white dark:bg-zinc-900 p-6 rounded shadow-lg w-full max-w-md">
+                                    <h4 className="font-semibold mb-2">Unblock Work Item</h4>
+                                    <div className="mb-4">Are you sure you want to unblock this work item?</div>
+                                    {unblockError && <div className="text-red-600 text-sm mb-2">{unblockError}</div>}
+                                    <div className="flex gap-2 justify-end">
+                                        <Button variant="outline" onClick={() => { setUnblockDialogOpen(false); setUnblockError(null); }} disabled={unblockLoading}>Cancel</Button>
+                                        <Button
+                                            variant="secondary"
+                                            disabled={unblockLoading}
+                                            onClick={async () => {
+                                                setUnblockLoading(true);
+                                                setUnblockError(null);
+                                                try {
+                                                    await unblockWorkItem({ variables: { id: detailData.workItem.data.id } });
+                                                    setUnblockDialogOpen(false);
+                                                } catch (err: unknown) {
+                                                    setUnblockError((err as Error).message || "Failed to unblock work item");
+                                                } finally {
+                                                    setUnblockLoading(false);
+                                                }
+                                            }}
+                                        >{unblockLoading ? "Unblocking..." : "Unblock"}</Button>
+                                    </div>
+                                </div>
+                            </div>
                         )}
                     </TabsContent>
                 </Tabs>
