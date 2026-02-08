@@ -9,6 +9,8 @@ export interface WorkItemDetailUser {
 export interface WorkItemHistoryEvent {
   eventType: string;
   user: WorkItemDetailUser;
+  fromState?: string;
+  toState?: string;
   createdAt: string;
   justification?: string;
 }
@@ -61,6 +63,8 @@ export const WORKITEM_DETAIL_QUERY = gql`
             email
             userName
           }
+          fromState
+          toState
           createdAt
           justification
         }

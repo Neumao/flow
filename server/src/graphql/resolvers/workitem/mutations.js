@@ -26,7 +26,19 @@ export const workItemMutations = {
             include: { createdBy: true },
         });
         logger.info(`Work item created: ${item.id} by user: ${user.id}`);
-        // TODO: Add audit event
+
+        // Create audit event for creation
+        await prisma.workItemAuditEvent.create({
+            data: {
+                workItemId: item.id,
+                userId: user.id,
+                eventType: 'STATE_CHANGE',
+                fromState: null,
+                toState: 'NEW',
+                justification: 'Work item created',
+            },
+        });
+
         return apiResponse.success('Work item created', item);
     },
 
@@ -53,7 +65,19 @@ export const workItemMutations = {
             data: { title, description },
         });
         logger.info(`Work item updated: ${id} by user: ${user.id}`);
-        // TODO: Add audit event
+
+        // Create audit event for update
+        await prisma.workItemAuditEvent.create({
+            data: {
+                workItemId: id,
+                userId: user.id,
+                eventType: 'STATE_CHANGE',
+                fromState: item.state,
+                toState: item.state, // State doesn't change on update
+                justification: 'Work item updated',
+            },
+        });
+
         return apiResponse.success('Work item updated', updated);
     },
 

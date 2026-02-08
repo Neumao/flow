@@ -38,6 +38,8 @@ Expected Result: [Expected outcome]
 
 ### Complete Happy Path Flow
 
+DONE:
+
 ```
 TC-SYSADMIN-HAPPY-001: Complete work item lifecycle as SYSADMIN
 Prerequisites: SYSADMIN user logged in
@@ -52,6 +54,8 @@ Expected Result: Work item successfully moves through complete lifecycle
 ```
 
 ### Blocking and Unblocking Flow
+
+DONE:
 
 ```
 TC-SYSADMIN-BLOCK-001: Block and unblock work item
@@ -68,6 +72,8 @@ Expected Result: Blocking prevents transitions, unblocking allows normal flow
 
 ### Rework Flow
 
+DONE:
+
 ```
 TC-SYSADMIN-REWORK-001: Send work item for rework
 Prerequisites: Work item in REVIEW state
@@ -82,6 +88,8 @@ Expected Result: Rework flow allows item to be sent back and completed
 
 ### Cancellation Flow
 
+DONE:
+
 ```
 TC-SYSADMIN-CANCEL-001: Cancel work item from different states
 Prerequisites: Multiple work items in different states
@@ -94,6 +102,8 @@ Expected Result: Cancellation works from any state
 ```
 
 ### Cross-User Operations
+
+DONE:
 
 ```
 TC-SYSADMIN-CROSS-001: SYSADMIN can operate on any user's work items
@@ -113,6 +123,8 @@ Expected Result: SYSADMIN has full access to all work items
 ## ADMIN User Test Cases
 
 ### Complete Happy Path Flow
+
+DONE:
 
 ```
 TC-ADMIN-HAPPY-001: Complete work item lifecycle as ADMIN

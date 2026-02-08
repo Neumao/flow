@@ -1,10 +1,6 @@
 import {
-  BadgeCheck,
-  Bell,
   ChevronsUpDown,
-  CreditCard,
   LogOut,
-  Sparkles,
 } from "lucide-react"
 
 import {
@@ -46,22 +42,6 @@ export function NavUser({
     navigate('/login')
   }
 
-  const handleAccountClick = () => {
-    navigate('/layout/profile')
-  }
-
-  const handleBillingClick = () => {
-    navigate('/layout/billing')
-  }
-
-  const handleNotificationsClick = () => {
-    navigate('/layout/notifications')
-  }
-
-  const handleUpgradeClick = () => {
-    navigate('/layout/upgrade')
-  }
-
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -98,28 +78,6 @@ export function NavUser({
                 </div>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem onClick={handleUpgradeClick}>
-                <Sparkles />
-                Upgrade to Pro
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem onClick={handleAccountClick}>
-                <BadgeCheck />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleBillingClick}>
-                <CreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleNotificationsClick}>
-                <Bell />
-                Notifications
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>
               <LogOut />
