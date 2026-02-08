@@ -301,12 +301,12 @@ const WorkItemsPage = () => {
                                                                             <Badge
                                                                                 variant="secondary"
                                                                                 className={`text-xs ${event.eventType === 'CREATED' ? 'bg-green-100 text-green-800' :
-                                                                                        event.eventType === 'UPDATED' ? 'bg-blue-100 text-blue-800' :
-                                                                                            event.eventType === 'STATE_CHANGED' ? 'bg-purple-100 text-purple-800' :
-                                                                                                event.eventType === 'BLOCKED' ? 'bg-red-100 text-red-800' :
-                                                                                                    event.eventType === 'UNBLOCKED' ? 'bg-yellow-100 text-yellow-800' :
-                                                                                                        event.eventType === 'CANCELLED' ? 'bg-gray-100 text-gray-800' :
-                                                                                                            'bg-gray-100 text-gray-800'
+                                                                                    event.eventType === 'UPDATED' ? 'bg-blue-100 text-blue-800' :
+                                                                                        event.eventType === 'STATE_CHANGED' ? 'bg-purple-100 text-purple-800' :
+                                                                                            event.eventType === 'BLOCKED' ? 'bg-red-100 text-red-800' :
+                                                                                                event.eventType === 'UNBLOCKED' ? 'bg-yellow-100 text-yellow-800' :
+                                                                                                    event.eventType === 'CANCELLED' ? 'bg-gray-100 text-gray-800' :
+                                                                                                        'bg-gray-100 text-gray-800'
                                                                                     }`}
                                                                             >
                                                                                 {event.eventType.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase())}

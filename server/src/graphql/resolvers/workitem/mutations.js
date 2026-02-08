@@ -12,6 +12,10 @@ export const workItemMutations = {
     // Create a new work item
     createWorkItem: async (_, { input }, { user }) => {
         if (!user) throw new Error('Authentication required');
+        // USER can only transition their own items
+        if (user.role === 'MODERATOR') {
+            return apiResponse.error('Not authorized to create work item');
+        }
         const { title, description } = input;
         logger.debug(`Creating work item for user: ${user.id}`);
         const item = await prisma.workItem.create({
@@ -45,6 +49,9 @@ export const workItemMutations = {
     // Update work item (only creator or admin)
     updateWorkItem: async (_, { input }, { user }) => {
         if (!user) return apiResponse.error('Authentication required');
+        if (user.role === 'MODERATOR') {
+            return apiResponse.error('Not authorized to update work item');
+        }
         const { id, title, description } = input;
         logger.debug(`Updating work item ${id} by user: ${user.id}`);
         const item = await prisma.workItem.findUnique({ where: { id } });
