@@ -27,12 +27,10 @@ export const workItemQueries = {
                 where,
                 include: { createdBy: true, auditEvents: { include: { user: true } } },
             });
-            logger.debug('prisma.workItem.findMany result:', items);
             if (!Array.isArray(items)) {
                 logger.error('prisma.workItem.findMany did not return an array:', items);
                 return apiResponse.error('Internal error');
             }
-            logger.info(`Fetched ${items.length} work items for user: ${user?.id}`);
             return apiResponse.success('Fetched work items', items);
         } catch (err) {
             logger.error('Error fetching work items:', err);

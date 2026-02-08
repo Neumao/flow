@@ -7,6 +7,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Table, TableHeader, TableHead, TableRow, TableCell, TableBody } from "@/components/ui/table"
 import { Alert } from "@/components/ui/alert"
 import { Loader2, Plus, Eye, Ban, CheckCircle, RefreshCw, Edit, XCircle, ArrowRightLeft, Lock, Unlock } from "lucide-react"
+import { WorkItemActions } from "@/components/workitem-actions"
 import { WorkItemCreateDialog } from "@/components/workitem-create-dialog"
 import { WORKITEMS_QUERY, WorkItem } from "@/graphql/queries/workitems"
 import { WORKITEM_DETAIL_QUERY, WorkItemDetail } from "@/graphql/queries/workitemDetail"
@@ -22,6 +23,17 @@ import { CANCEL_WORKITEM_MUTATION } from "@/graphql/mutations/workitems"
 
 
 const WorkItemsPage = () => {
+    // Permission mapping for roles
+    const rolePermissions = [
+        { action: "Create Work Item", roles: ["SYSADMIN", "ADMIN", "USER (own items only)"] },
+        { action: "Update Work Item", roles: ["SYSADMIN", "ADMIN", "USER (own items only)"] },
+        { action: "Block Work Item", roles: ["SYSADMIN", "ADMIN", "USER (own items only)"] },
+        { action: "Unblock Work Item", roles: ["SYSADMIN", "ADMIN", "MODERATOR", "USER (own items only)"] },
+        { action: "Rework Work Item", roles: ["SYSADMIN", "ADMIN", "MODERATOR"] },
+        { action: "Cancel Work Item", roles: ["SYSADMIN", "ADMIN", "USER (own items only)"] },
+        { action: "State Transition", roles: ["SYSADMIN", "ADMIN", "MODERATOR", "USER (own items only)"] },
+        { action: "View Work Item History", roles: ["SYSADMIN", "ADMIN", "MODERATOR", "USER (own items only)"] }
+    ];
     // Get current user and role
     const { user } = useAuth();
     // Dialog state for cancel
@@ -193,6 +205,26 @@ const WorkItemsPage = () => {
                                         Back to List
                                     </Button>
                                 </CardHeader>
+                                {/* Permissions Div */}
+                                <div className="mb-4 p-3 rounded bg-muted/20 border border-muted">
+                                    <h3 className="font-semibold text-sm mb-2">Permissions by Role</h3>
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Action</TableHead>
+                                                <TableHead>Allowed Roles</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {rolePermissions.map((perm) => (
+                                                <TableRow key={perm.action}>
+                                                    <TableCell>{perm.action}</TableCell>
+                                                    <TableCell>{perm.roles.join(", ")}</TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </div>
                                 <CardContent>
                                     {detailLoading ? (
                                         <div className="flex justify-center py-12"><Loader2 className="animate-spin w-8 h-8" /></div>
@@ -214,33 +246,15 @@ const WorkItemsPage = () => {
                                             </div>
                                             {/* Actions: update, block, unblock, rework, state transitions */}
                                             <div className="flex flex-wrap gap-2 my-2">
-                                                {/* Edit button (for update) */}
-                                                {(user?.role === "SYSADMIN" || (user?.role === "ADMIN") || (user?.role === "USER" && detailData.workItem.data.createdBy?.id === user.id)) && (
-                                                    <Button size="sm" variant="outline" className="gap-1">
-                                                        <Edit className="w-4 h-4" /> Edit
-                                                    </Button>
-                                                )}
-                                                {/* Block button (only if not blocked, not in NEW, not already BLOCKED) */}
-                                                {(user?.role === "SYSADMIN" || user?.role === "ADMIN" || (user?.role === "USER" && detailData.workItem.data.createdBy?.id === user.id))
-                                                    && !detailData.workItem.data.blocked
-                                                    && detailData.workItem.data.state !== "NEW"
-                                                    && detailData.workItem.data.state !== "BLOCKED" && (
-                                                        <Button size="sm" variant="destructive" className="gap-1" onClick={() => setBlockDialogOpen(true)}>
-                                                            <Lock className="w-4 h-4" /> Block
-                                                        </Button>
-                                                    )}
-                                                {/* Unblock button (if blocked) */}
-                                                {(user?.role === "SYSADMIN" || user?.role === "ADMIN" || user?.role === "MODERATOR" || (user?.role === "USER" && detailData.workItem.data.createdBy?.id === user.id)) && detailData.workItem.data.blocked && (
-                                                    <Button size="sm" variant="secondary" className="gap-1" onClick={() => setUnblockDialogOpen(true)}>
-                                                        <Unlock className="w-4 h-4" /> Unblock
-                                                    </Button>
-                                                )}
-                                                {/* Rework button (if in REVIEW) */}
-                                                {(user?.role === "SYSADMIN" || user?.role === "ADMIN" || user?.role === "MODERATOR") && detailData.workItem.data.state === "REVIEW" && (
-                                                    <Button size="sm" variant="secondary" className="gap-1" onClick={() => setReworkDialogOpen(true)}>
-                                                        <ArrowRightLeft className="w-4 h-4" /> Rework
-                                                    </Button>
-                                                )}
+                                                {/* Refactored: Use WorkItemActions component */}
+                                                <WorkItemActions
+                                                    user={user}
+                                                    workItem={detailData.workItem.data}
+                                                    onEdit={() => {/* open edit dialog or logic */ }}
+                                                    onBlock={() => setBlockDialogOpen(true)}
+                                                    onUnblock={() => setUnblockDialogOpen(true)}
+                                                    onCancel={() => setCancelDialogOpen(true)}
+                                                />
                                                 {/* Rework dialog */}
                                                 {reworkDialogOpen && (
                                                     <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
@@ -335,10 +349,12 @@ const WorkItemsPage = () => {
                                                     </div>
                                                 )}
                                                 {/* Cancel button (allowed in any state, including NEW) */}
-                                                {(user?.role === "SYSADMIN" || user?.role === "ADMIN" || (user?.role === "USER" && detailData.workItem.data.createdBy?.id === user.id)) && (
+                                                {((user?.role === "SYSADMIN" || user?.role === "ADMIN" || (user?.role === "USER" && detailData.workItem.data.createdBy?.id === user.id))) ? (
                                                     <Button size="sm" variant="destructive" className="gap-1" onClick={() => setCancelDialogOpen(true)}>
                                                         <XCircle className="w-4 h-4" /> Cancel
                                                     </Button>
+                                                ) : (
+                                                    <span className="text-xs text-muted-foreground">You do not have permission to cancel this work item.</span>
                                                 )}
                                                 {/* Cancel dialog */}
                                                 {cancelDialogOpen && (

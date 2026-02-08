@@ -3,40 +3,55 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useState } from "react";
 
 export function WorkItemActions({ workItem, onAction }: { workItem: any; onAction: (action: string, payload?: any) => void }) {
-    const [open, setOpen] = useState(false);
-    const [actionType, setActionType] = useState<string | null>(null);
-
-    const handleAction = (type: string) => {
-        setActionType(type);
-        setOpen(true);
-    };
-
-    const handleDialogClose = () => {
-        setOpen(false);
-        setActionType(null);
-    };
-
-    // Example: Only show block/unblock for MODERATOR/ADMIN/SYSADMIN
-    // Add role checks as needed
+    // Permission checks (user is passed as prop)
+    const user = arguments[0].user;
+    const canEdit = user?.role === "SYSADMIN" || user?.role === "ADMIN" || (user?.role === "USER" && workItem.createdBy?.id === user.id);
+    const canBlock = (user?.role === "SYSADMIN" || user?.role === "ADMIN" || (user?.role === "USER" && workItem.createdBy?.id === user.id)) && !workItem.blocked && workItem.state !== "NEW" && workItem.state !== "BLOCKED";
+    const canUnblock = (user?.role === "SYSADMIN" || user?.role === "ADMIN" || user?.role === "MODERATOR" || (user?.role === "USER" && workItem.createdBy?.id === user.id)) && workItem.blocked;
+    const canCancel = user?.role === "SYSADMIN" || user?.role === "ADMIN" || (user?.role === "USER" && workItem.createdBy?.id === user.id);
 
     return (
-        <>
-            <div className="flex gap-2">
-                <Button variant="default" size="sm" onClick={() => handleAction("view")}>View</Button>
-                <Button variant="default" size="sm" onClick={() => handleAction("edit")}>Edit</Button>
-                <Button variant="default" size="sm" onClick={() => handleAction("transition")}>Transition</Button>
-                {workItem.blocked ? (
-                    <Button variant="secondary" size="sm" onClick={() => handleAction("unblock")}>Unblock</Button>
+        <div className="flex flex-wrap gap-3 my-4">
+            {/* Edit button */}
+            <div className="flex flex-col items-center">
+                {canEdit ? (
+                    <Button size="sm" variant="outline" className="gap-1 font-semibold" onClick={() => onAction("edit")}>
+                        Edit
+                    </Button>
                 ) : (
-                    <Button variant="destructive" size="sm" onClick={() => handleAction("block")}>Block</Button>
+                    <span className="text-xs text-muted-foreground">Edit <span className="bg-red-100 text-red-600 px-2 py-0.5 rounded">Denied</span></span>
                 )}
-                <Button variant="outline" size="sm" onClick={() => handleAction("rework")}>Rework</Button>
-                <Button variant="destructive" size="sm" onClick={() => handleAction("cancel")}>Cancel</Button>
             </div>
-            {actionType === "view" && open && (
-                <WorkItemDetailDialog open={open} onOpenChange={handleDialogClose} workItem={workItem} />
-            )}
-            {/* TODO: Add dialogs for other actions */}
-        </>
+            {/* Block button */}
+            <div className="flex flex-col items-center">
+                {canBlock ? (
+                    <Button size="sm" variant="destructive" className="gap-1 font-semibold" onClick={() => onAction("block")}>
+                        Block
+                    </Button>
+                ) : (
+                    <span className="text-xs text-muted-foreground">Block <span className="bg-red-100 text-red-600 px-2 py-0.5 rounded">Denied</span></span>
+                )}
+            </div>
+            {/* Unblock button */}
+            <div className="flex flex-col items-center">
+                {canUnblock ? (
+                    <Button size="sm" variant="secondary" className="gap-1 font-semibold" onClick={() => onAction("unblock")}>
+                        Unblock
+                    </Button>
+                ) : (
+                    <span className="text-xs text-muted-foreground">Unblock <span className="bg-red-100 text-red-600 px-2 py-0.5 rounded">Denied</span></span>
+                )}
+            </div>
+            {/* Cancel button */}
+            <div className="flex flex-col items-center">
+                {canCancel ? (
+                    <Button size="sm" variant="destructive" className="gap-1 font-semibold" onClick={() => onAction("cancel")}>
+                        Cancel
+                    </Button>
+                ) : (
+                    <span className="text-xs text-muted-foreground">Cancel <span className="bg-red-100 text-red-600 px-2 py-0.5 rounded">Denied</span></span>
+                )}
+            </div>
+        </div>
     );
 }
